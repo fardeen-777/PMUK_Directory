@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PMUK Staff Directory</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1B1B18;
+    --paper:#F6F4EC;
+    --paper-raised:#FFFFFE;
+    --forest:#163A2E;
+    --forest-deep:#0E2620;
+    --gold:#C99A2E;
+    --gold-deep:#A87E1F;
+    --rust:#9C4221;
+    --sage-line:#DCE3D6;
+    --muted:#6B7268;
+    --focus:#2F6F5E;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'IBM Plex Sans', system-ui, sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  a{color:inherit;}
+
+  ::selection{background:var(--gold); color:var(--forest-deep);}
+
+  /* ---------- Header ---------- */
+  header.top{
+    background:var(--forest);
+    color:#F3EFE2;
+    padding:22px 24px 26px;
+    position:relative;
+    overflow:hidden;
+  }
+  header.top::after{
+    content:"";
+    position:absolute;
+    right:-40px; top:-60px;
+    width:220px; height:220px;
+    border-radius:50%;
+    background:radial-gradient(circle, rgba(201,154,46,0.18), transparent 70%);
+  }
+  .top-inner{
+    max-width:880px;
+    margin:0 auto;
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:16px;
+    position:relative;
+    z-index:1;
+    flex-wrap:wrap;
+  }
+  .wordmark{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:28px;
+    letter-spacing:0.2px;
+  }
+  .wordmark small{
+    display:block;
+    font-family:'IBM Plex Sans', sans-serif;
+    font-weight:400;
+    font-size:12.5px;
+    letter-spacing:1.6px;
+    text-transform:uppercase;
+    color:#C9D6CC;
+    margin-top:2px;
+  }
+  .count-badge{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12.5px;
+    color:#DCE7DF;
+    border:1px solid rgba(255,255,255,0.22);
+    padding:5px 10px;
+    border-radius:3px;
+    white-space:nowrap;
+  }
+  .count-badge b{color:var(--gold); font-weight:600;}
+
+  /* ---------- Search zone ---------- */
+  main{
+    max-width:880px;
+    margin:0 auto;
+    padding:0 20px 60px;
+  }
+  .search-wrap{
+    margin-top:-20px;
+    position:relative;
+    z-index:2;
+  }
+  .search-card{
+    background:var(--paper-raised);
+    border:1px solid var(--sage-line);
+    border-radius:6px;
+    box-shadow:0 10px 24px -14px rgba(20,40,32,0.35), 0 2px 6px rgba(20,40,32,0.06);
+    padding:16px 18px;
+  }
+  .search-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    border-bottom:1px solid var(--sage-line);
+    padding-bottom:12px;
+  }
+  .search-row svg{flex:none; color:var(--muted);}
+  #q{
+    flex:1;
+    border:none;
+    outline:none;
+    background:transparent;
+    font-family:'IBM Plex Sans', sans-serif;
+    font-size:17px;
+    color:var(--ink);
+    padding:6px 2px;
+  }
+  #q::placeholder{color:#96988F;}
+  #clearBtn{
+    border:none;
+    background:none;
+    color:var(--muted);
+    font-size:13px;
+    cursor:pointer;
+    padding:4px 6px;
+    display:none;
+    font-family:'IBM Plex Sans',sans-serif;
+  }
+  #clearBtn:hover{color:var(--rust);}
+
+  .hint-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-top:12px;
+  }
+  .hint-row span.label{
+    font-size:11.5px;
+    text-transform:uppercase;
+    letter-spacing:1px;
+    color:var(--muted);
+    align-self:center;
+    margin-right:2px;
+  }
+  .chip{
+    border:1px solid var(--sage-line);
+    background:#FBFAF5;
+    color:var(--forest-deep);
+    font-size:13px;
+    padding:5px 11px;
+    border-radius:999px;
+    cursor:pointer;
+    transition:background 0.15s, border-color 0.15s, transform 0.1s;
+    font-family:'IBM Plex Sans', sans-serif;
+  }
+  .chip:hover{border-color:var(--gold-deep); transform:translateY(-1px);}
+  .chip.example{font-style:italic; color:var(--muted);}
+
+  /* Filter chips */
+  .filters{
+    display:flex;
+    gap:8px;
+    margin-top:16px;
+    flex-wrap:wrap;
+  }
+  .filter-chip{
+    border:1px solid var(--sage-line);
+    background:var(--paper-raised);
+    padding:7px 14px;
+    border-radius:999px;
+    font-size:13.5px;
+    cursor:pointer;
+    color:var(--muted);
+    font-family:'IBM Plex Sans', sans-serif;
+    transition:all 0.15s;
+  }
+  .filter-chip[data-active="true"]{
+    background:var(--forest);
+    border-color:var(--forest);
+    color:#F3EFE2;
+  }
+  .filter-chip .dot{
+    display:inline-block;
+    width:7px;height:7px;
+    border-radius:50%;
+    margin-right:6px;
+    vertical-align:middle;
+  }
+  .dot.all{background:linear-gradient(90deg, var(--forest) 50%, var(--gold) 50%);}
+  .dot.region{background:var(--forest);}
+  .dot.branch{background:var(--gold);}
+
+  /* ---------- Status line ---------- */
+  .status-line{
+    margin:22px 2px 10px;
+    font-size:12.5px;
+    color:var(--muted);
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    font-family:'IBM Plex Mono', monospace;
+  }
+
+  /* ---------- Results ---------- */
+  .group-header{
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-size:15px;
+    color:var(--forest-deep);
+    margin:26px 0 8px;
+    padding-bottom:6px;
+    border-bottom:1px solid var(--sage-line);
+    display:flex;
+    justify-content:space-between;
+  }
+  .group-header .n{
+    font-family:'IBM Plex Mono', monospace;
+    font-style:normal;
+    font-size:11px;
+    color:var(--muted);
+  }
+
+  .card{
+    display:flex;
+    align-items:stretch;
+    background:var(--paper-raised);
+    border:1px solid var(--sage-line);
+    border-left:none;
+    border-radius:4px;
+    margin-bottom:7px;
+    overflow:hidden;
+    transition:box-shadow 0.15s, transform 0.1s;
+    position:relative;
+  }
+  .card:hover{
+    box-shadow:0 6px 16px -10px rgba(20,40,32,0.35);
+    transform:translateY(-1px);
+  }
+  .card .tab{
+    width:6px;
+    flex:none;
+    background:var(--forest);
+  }
+  .card.branch .tab{background:var(--gold);}
+
+  .card-body{
+    flex:1;
+    padding:12px 14px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+    flex-wrap:wrap;
+  }
+  .card-main .name{
+    font-weight:600;
+    font-size:15px;
+    color:var(--ink);
+  }
+  .card-main .name.placeholder{
+    color:var(--muted);
+    font-weight:500;
+    font-style:italic;
+  }
+  .card-main .sub{
+    font-size:12.8px;
+    color:var(--muted);
+    margin-top:2px;
+  }
+  .card-main .sub .sep{margin:0 6px; color:#B7BCB0;}
+  mark{
+    background:rgba(201,154,46,0.35);
+    color:inherit;
+    border-radius:2px;
+    padding:0 1px;
+  }
+
+  .card-actions{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    flex:none;
+  }
+  .phone{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:14.5px;
+    color:var(--forest-deep);
+    letter-spacing:0.3px;
+    white-space:nowrap;
+  }
+  .icon-btn{
+    border:1px solid var(--sage-line);
+    background:#fff;
+    width:32px; height:32px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    color:var(--forest-deep);
+    text-decoration:none;
+    transition:background 0.15s, border-color 0.15s;
+  }
+  .icon-btn:hover{background:var(--forest); color:#fff; border-color:var(--forest);}
+  .icon-btn.copied{background:var(--gold); border-color:var(--gold-deep); color:var(--forest-deep);}
+
+  /* ---------- Empty / no-results states ---------- */
+  .empty-state{
+    text-align:center;
+    padding:50px 20px 20px;
+    color:var(--muted);
+  }
+  .empty-state .glyph{
+    font-family:'Fraunces', serif;
+    font-size:34px;
+    color:var(--sage-line);
+    margin-bottom:6px;
+  }
+  .empty-state p{max-width:420px; margin:6px auto; font-size:14px; line-height:1.55;}
+
+  /* ---------- Branch collapse ---------- */
+  details.branch-block{
+    margin-top:30px;
+    border-top:1px solid var(--sage-line);
+    padding-top:6px;
+  }
+  details.branch-block summary{
+    cursor:pointer;
+    list-style:none;
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-size:15px;
+    color:var(--forest-deep);
+    padding:10px 2px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+  }
+  details.branch-block summary::-webkit-details-marker{display:none;}
+  details.branch-block summary .arrow{
+    font-family:'IBM Plex Sans', sans-serif;
+    font-style:normal;
+    font-size:12px;
+    color:var(--muted);
+    transition:transform 0.15s;
+  }
+  details.branch-block[open] summary .arrow{transform:rotate(90deg);}
+  .branch-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(150px,1fr));
+    gap:6px;
+    margin-top:8px;
+  }
+  .branch-grid .bcell{
+    border:1px solid var(--sage-line);
+    background:var(--paper-raised);
+    border-radius:4px;
+    padding:8px 10px;
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+  }
+  .branch-grid .bcell .blabel{font-size:11px; color:var(--muted);}
+  .branch-grid .bcell .bphone{font-family:'IBM Plex Mono', monospace; font-size:13px; display:flex; justify-content:space-between; align-items:center;}
+  .branch-grid .bcell a.icon-btn{width:24px;height:24px;}
+
+  footer{
+    max-width:880px;
+    margin:0 auto;
+    padding:10px 20px 50px;
+    color:var(--muted);
+    font-size:12px;
+    line-height:1.7;
+    border-top:1px solid var(--sage-line);
+  }
+
+  @media (max-width:560px){
+    .wordmark{font-size:23px;}
+    .card-body{padding:11px 12px;}
+    .phone{font-size:13.5px;}
+    .search-row #q{font-size:16px;}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none !important; scroll-behavior:auto !important;}
+  }
+
+  :focus-visible{outline:2px solid var(--focus); outline-offset:2px;}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <div class="wordmark">PMUK<small>Staff Phone Directory</small></div>
+    <div class="count-badge">Region &amp; Area Office <b id="countRegion">–</b> &nbsp;·&nbsp; Branch Managers <b id="countBranch">–</b></div>
+  </div>
+</header>
+
+<main>
+  <div class="search-wrap">
+    <div class="search-card">
+      <div class="search-row">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input id="q" type="text" autocomplete="off" spellcheck="false"
+          placeholder="Search a name, PIN, or try &ldquo;Faridpur zone manager&rdquo;">
+        <button id="clearBtn" aria-label="Clear search">Clear</button>
+      </div>
+      <div class="hint-row">
+        <span class="label">Try</span>
+        <span class="chip example" data-fill="Faridpur zone manager">Faridpur zone manager</span>
+        <span class="chip example" data-fill="Bogura region driver">Bogura region driver</span>
+        <span class="chip example" data-fill="Branch 250">Branch 250</span>
+        <span class="chip example" data-fill="area manager sylhet">area manager Sylhet</span>
+      </div>
+      <div class="filters" role="tablist" aria-label="Filter by category">
+        <button class="filter-chip" data-active="true" data-filter="all"><span class="dot all"></span>All</button>
+        <button class="filter-chip" data-filter="Region & Area Office"><span class="dot region"></span>Region &amp; Area Office</button>
+        <button class="filter-chip" data-filter="Branch (BM - Bundle 17)"><span class="dot branch"></span>Branch Managers</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="status-line">
+    <span id="statusText">Loading directory…</span>
+    <span id="statusHint"></span>
+  </div>
+
+  <div id="results" aria-live="polite"></div>
+</main>
+
+<footer>
+  PMUK Staff Phone Directory · 559 numbers combined from the Region &amp; Area Office mobile bill (June 2026) and the Bundle-17 Branch Manager list.
+  Branch entries have no branch name in the source file, so they are labeled Branch 1–397 in original list order.
+  Leading zeros were restored on all Branch Manager numbers. "Office Code (PIN)" comes from the source file and is not a unique personal ID — some codes repeat across two staff at the same office.
+  Numbers are shown for internal PMUK use.
+</footer>
+
+<script>
+const DATA = [{"sl":1,"name":"Sohorab Hossain Fardeen","designation":"Asst. Director & Regional Manager","location":"Dhaka (S) Region","category":"Region & Area Office","mobile":"01730793001","pin":"0075290310","remarks":""},{"sl":2,"name":"Mst. Israt Mehezamin","designation":"Manager (HR &Admin)","location":"Dhaka (S) Region","category":"Region & Area Office","mobile":"01730793002","pin":"","remarks":""},{"sl":3,"name":"Md. Jahangir Sikdar","designation":"Driver","location":"Dhaka (S) Region","category":"Region & Area Office","mobile":"01730793055","pin":"0094780712","remarks":""},{"sl":4,"name":"Md. Mydul Islam","designation":"Sr. Manager & Area Manager","location":"Mohmmadpur Area","category":"Region & Area Office","mobile":"01730793004","pin":"","remarks":""},{"sl":5,"name":"Md. Mamunur Rashid","designation":"Sr. Manager & Area Manager","location":"Basabo Area (PME)","category":"Region & Area Office","mobile":"01335172538","pin":"0004140903","remarks":""},{"sl":6,"name":"Md. Imran Tarafdar","designation":"Sr. Manager & Area Manager","location":"Basabo Area (PMF)","category":"Region & Area Office","mobile":"01730793028","pin":"0004140903","remarks":""},{"sl":7,"name":"Nazrul Islam","designation":"Sr. Manager & Area Manager","location":"Monshigonj Area","category":"Region & Area Office","mobile":"01713249687","pin":"0078970610","remarks":""},{"sl":8,"name":"Md. Rafiqul Islam","designation":"Sr. Manager & Area Manager","location":"Narayanganj Area","category":"Region & Area Office","mobile":"01713092973","pin":"","remarks":""},{"sl":9,"name":"Md. Gaffar Ali","designation":"Sr. Manager & Area Manager","location":"Karwan Bazar Area","category":"Region & Area Office","mobile":"01313426921","pin":"","remarks":""},{"sl":10,"name":"S.M. Mosthafijur Rahman","designation":"Asst. Director & Regional Manager","location":"Dhaka (N) Region","category":"Region & Area Office","mobile":"01329709727","pin":"","remarks":""},{"sl":11,"name":"Joyonti Roy","designation":"Sr. Manager (Finance & Acc.)","location":"Dhaka (N) Region","category":"Region & Area Office","mobile":"01329709728","pin":"","remarks":""},{"sl":12,"name":"Sheikh Syful Islam","designation":"Driver","location":"Dhaka (N) Region","category":"Region & Area Office","mobile":"01329668100","pin":"","remarks":""},{"sl":13,"name":"Md. Rafikul Islam","designation":"Sr. Manager & Area Manager","location":"Narshingdi Area","category":"Region & Area Office","mobile":"01730793073","pin":"0018220606","remarks":""},{"sl":14,"name":"Md. Musaraf Husen Khan","designation":"Sr. Manager & Area Manager","location":"Sreepur Area","category":"Region & Area Office","mobile":"01713379229","pin":"0002590203","remarks":""},{"sl":15,"name":"Md. Jahangir Alam Molla","designation":"Sr. Manager & Area Manager","location":"Gazipur Area","category":"Region & Area Office","mobile":"01730793050","pin":"0075300310","remarks":""},{"sl":16,"name":"Ohedul Islam","designation":"Asst. Director & Regional Manager","location":"Mymenshingh Region","category":"Region & Area Office","mobile":"01713249700","pin":"0001191001","remarks":""},{"sl":17,"name":"Md. Badar Uddin","designation":"Sr.Manager (Finance & Acc.)","location":"Mymenshingh Region","category":"Region & Area Office","mobile":"01730793100","pin":"0002880403","remarks":""},{"sl":18,"name":"Md. Nazim Uddin Khan Nazmul","designation":"Driver","location":"Mymenshingh Region","category":"Region & Area Office","mobile":"01713488895","pin":"","remarks":""},{"sl":19,"name":"Md. Ramzan Mia","designation":"Sr. Manager & Area Manager","location":"Jamalpur Area","category":"Region & Area Office","mobile":"01730793193","pin":"","remarks":""},{"sl":20,"name":"Md. Nazmul Hossain","designation":"Sr. Manager & Area Manager","location":"Rajibpur Area","category":"Region & Area Office","mobile":"01730793192","pin":"","remarks":""},{"sl":21,"name":"Md. Abu Bakar Siddiq","designation":"Sr. Manager & Area Manager","location":"Mymensingh Area","category":"Region & Area Office","mobile":"01713092981","pin":"0039451107","remarks":""},{"sl":22,"name":"Md. Tofazzel Hossain","designation":"Sr. Manager & Area Manager","location":"Gofargaon Area (PME)","category":"Region & Area Office","mobile":"01335172466","pin":"0059030908","remarks":""},{"sl":23,"name":"Md. Babor Ali","designation":"Sr. Manager & Area Manager","location":"Gofargaon Area (PMF)","category":"Region & Area Office","mobile":"01713379220","pin":"0059030908","remarks":""},{"sl":24,"name":"Md. Rohidul Islam","designation":"Sr. Manager & Area Manager","location":"Bhaluka Area","category":"Region & Area Office","mobile":"01329735127","pin":"","remarks":""},{"sl":25,"name":"Fazlul Karim Talukder","designation":"Asst. Director & Regional Manager","location":"Barisal Region","category":"Region & Area Office","mobile":"01713092996","pin":"0003370703","remarks":""},{"sl":26,"name":"Md. Monirul Islam","designation":"Sr. Manager (HR & Admin)","location":"Barisal Region","category":"Region & Area Office","mobile":"01335172494","pin":"","remarks":""},{"sl":27,"name":"K M Jasim Uddin","designation":"Sr. Manager (Finance & Acc.)","location":"Barisal Region","category":"Region & Area Office","mobile":"01730026862","pin":"0065370309","remarks":""},{"sl":28,"name":"A.H.M Arshadul Islam","designation":"Branch Manager","location":"Barisal Region","category":"Region & Area Office","mobile":"01713379236","pin":"","remarks":""},{"sl":29,"name":"Md. Rakib Hossain","designation":"Branch Manager","location":"Barisal Region","category":"Region & Area Office","mobile":"01730027008","pin":"","remarks":""},{"sl":30,"name":"Md. Hemayeth Hossain","designation":"Driver","location":"Barisal Region","category":"Region & Area Office","mobile":"01713249726","pin":"","remarks":""},{"sl":31,"name":"Md. Julhas","designation":"Driver (Speed Board)","location":"Barisal Region","category":"Region & Area Office","mobile":"01730026360","pin":"","remarks":""},{"sl":32,"name":"Md. Altap Husain","designation":"Sr. Manager & Area Manager","location":"Barisal Area","category":"Region & Area Office","mobile":"01713092976","pin":"0008961004","remarks":""},{"sl":33,"name":"Md. Abdul Malek","designation":"Sr. Manager & Area Manager","location":"Gouranadi Area","category":"Region & Area Office","mobile":"01730024576","pin":"","remarks":""},{"sl":34,"name":"Sanjoy Kumer","designation":"Sr. Manager & Area Manager","location":"Nesarabad Area","category":"Region & Area Office","mobile":"01730024539","pin":"0076980410","remarks":""},{"sl":35,"name":"Aniruddha Sarker","designation":"Sr. Manager & Area Manager","location":"Shariatpur Area","category":"Region & Area Office","mobile":"01329713378","pin":"","remarks":""},{"sl":36,"name":"Kazi Golam Sorowar","designation":"Asst. Director & Regional Manager","location":"Patuakhali Region","category":"Region & Area Office","mobile":"01730026307","pin":"0059020908","remarks":""},{"sl":37,"name":"Md. Kamal Hossain","designation":"Sr. Manager (Finance & Acc.)","location":"Patuakhali Region","category":"Region & Area Office","mobile":"01730024567","pin":"0055800708","remarks":""},{"sl":38,"name":"Md. Shohag Akon","designation":"Driver","location":"Patuakhali Region","category":"Region & Area Office","mobile":"01713379238","pin":"","remarks":""},{"sl":39,"name":"Md. Wohab Mia","designation":"Sr. Manager & Area Manager","location":"Patuakhali Area","category":"Region & Area Office","mobile":"01713092974","pin":"0014971205","remarks":""},{"sl":40,"name":"Nitish Biswas","designation":"Sr. Manager & Area Manager","location":"Amtoli Area","category":"Region & Area Office","mobile":"01730024532","pin":"0087960511","remarks":""},{"sl":41,"name":"Md. Shafiqul Islam","designation":"Sr. Manager & Area Manager","location":"Dashmina Area","category":"Region & Area Office","mobile":"01329709730","pin":"","remarks":""},{"sl":42,"name":"Shohidul Islam","designation":"Asst. Director & Regional Manager","location":"Bhola Region","category":"Region & Area Office","mobile":"01713249673","pin":"0001050801","remarks":""},{"sl":43,"name":"Binoy Biswas","designation":"Manager (Finance & Acc.)","location":"Bhola Region","category":"Region & Area Office","mobile":"01730026361","pin":"0038381107","remarks":""},{"sl":44,"name":"Md. Asadul Islam","designation":"Driver","location":"Bhola Region","category":"Region & Area Office","mobile":"01713379290","pin":"","remarks":""},{"sl":45,"name":"Mostofa Kamal","designation":"Sr. Manager & Area Manager","location":"Bhola Area","category":"Region & Area Office","mobile":"01713379405","pin":"1138/10305","remarks":""},{"sl":46,"name":"Md. Shohag","designation":"Sr. Manager & Area Manager","location":"Kunjerhat Area","category":"Region & Area Office","mobile":"01713249670","pin":"0005290404","remarks":""},{"sl":47,"name":"Md. Nur Alom","designation":"Sr. Manager & Area Manager","location":"Charfesson Area","category":"Region & Area Office","mobile":"01713379315","pin":"","remarks":""},{"sl":48,"name":"Uttam Kumar Sarker","designation":"Asst. Director & Regional Manager","location":"Chittagong (North) Region","category":"Region & Area Office","mobile":"01713092998","pin":"0075250310","remarks":""},{"sl":49,"name":"Md. Mizanur Rahman","designation":"Recovery Superviser","location":"Chittagong (North) Region","category":"Region & Area Office","mobile":"01329735120","pin":"0005470404","remarks":""},{"sl":50,"name":"Md. Mesbah Uddin","designation":"Sr.Manager (Finance & Acc.)","location":"Chittagong (North) Region","category":"Region & Area Office","mobile":"01730024580","pin":"0005470404","remarks":""},{"sl":51,"name":"Md. Asraf","designation":"Driver","location":"Chittagong (North) Region","category":"Region & Area Office","mobile":"01730027241","pin":"","remarks":""},{"sl":52,"name":"Suin Chakma","designation":"Sr. Manager & Area Manager","location":"Hathazari Area","category":"Region & Area Office","mobile":"01713379222","pin":"1400/11105","remarks":""},{"sl":53,"name":"Mohammed Nazim Uddin","designation":"Sr. Manager & Area Manager","location":"Chattogram Area","category":"Region & Area Office","mobile":"01713092990","pin":"0018290606","remarks":""},{"sl":54,"name":"Md. Alamgir","designation":"Sr. Manager & Area Manager","location":"Sitakundo Area","category":"Region & Area Office","mobile":"01730024517","pin":"0004970104","remarks":""},{"sl":55,"name":"Md. Anwar Azim","designation":"Sr. Manager & Area Manager","location":"Rangunia Area","category":"Region & Area Office","mobile":"01730024516","pin":"0007801004","remarks":""},{"sl":56,"name":"Md. Nabiul Islam","designation":"Asst. Director & Regional Manager","location":"Chittagong (Parbotto) Region","category":"Region & Area Office","mobile":"01329735092","pin":"","remarks":""},{"sl":57,"name":"Md. Nabiul Islam","designation":"Asst. Director & Regional Manager (Alt. Number)","location":"Chittagong (Parbotto) Region","category":"Region & Area Office","mobile":"01805595001","pin":"","remarks":"Alternate number"},{"sl":58,"name":"Md. Abdul Haque Bhuiyan","designation":"Sr. Manager (Finance & Acc.)","location":"Chittagong (Parbotto) Region","category":"Region & Area Office","mobile":"01329735093","pin":"","remarks":""},{"sl":59,"name":"Md. Abdul Haque Bhuiyan","designation":"Sr. Manager (Finance & Acc.) (Alt. Number)","location":"Chittagong (Parbotto) Region","category":"Region & Area Office","mobile":"01805595002","pin":"","remarks":"Alternate number"},{"sl":60,"name":"Suman Dutta","designation":"Sr. Manager (HR &Admin)","location":"Chittagong (Parbotto) Region","category":"Region & Area Office","mobile":"01329735230","pin":"","remarks":""},{"sl":61,"name":"Suman Dutta","designation":"Sr. Manager (HR &Admin) (Alt. Number)","location":"Chittagong (Parbotto) Region","category":"Region & Area Office","mobile":"01805595003","pin":"","remarks":"Alternate number"},{"sl":62,"name":"Md. Miron Hossain","designation":"Driver","location":"Chittagong (Parbotto) Region","category":"Region & Area Office","mobile":"01329735094","pin":"","remarks":""},{"sl":63,"name":"Md. Miron Hossain","designation":"Driver (Alt. Number)","location":"Chittagong (Parbotto) Region","category":"Region & Area Office","mobile":"01805595004","pin":"","remarks":"Alternate number"},{"sl":64,"name":"Md. Amirul Islam","designation":"Sr. Manager & Area Manager","location":"Khagrachari Area","category":"Region & Area Office","mobile":"01730026337","pin":"0011980405","remarks":""},{"sl":65,"name":"Md. Amirul Islam","designation":"Sr. Manager & Area Manager (Alt. Number)","location":"Khagrachari Area","category":"Region & Area Office","mobile":"01805595006","pin":"","remarks":"Alternate number"},{"sl":66,"name":"Md. Abul Khair","designation":"Sr. Manager & Area Manager","location":"Guimara Area","category":"Region & Area Office","mobile":"01730024518","pin":"0020290906","remarks":""},{"sl":67,"name":"Md. Abul Khair","designation":"Sr. Manager & Area Manager (Alt. Number)","location":"Guimara Area","category":"Region & Area Office","mobile":"01805595007","pin":"","remarks":"Alternate number"},{"sl":68,"name":"Md. Jamshad Ali","designation":"Sr. Manager & Area Manager","location":"Rangamati Area","category":"Region & Area Office","mobile":"01329735095","pin":"","remarks":""},{"sl":69,"name":"Md. Jamshad Ali","designation":"Sr. Manager & Area Manager (Alt. Number)","location":"Rangamati Area","category":"Region & Area Office","mobile":"01805595008","pin":"","remarks":"Alternate number"},{"sl":70,"name":"Susamoy Chakma","designation":"Sr. Manager & Area Manager","location":"Bhujpur Area","category":"Region & Area Office","mobile":"01329735104","pin":"","remarks":""},{"sl":71,"name":"Susamoy Chakma","designation":"Sr. Manager & Area Manager (Alt. Number)","location":"Bhujpur Area","category":"Region & Area Office","mobile":"01805595009","pin":"","remarks":"Alternate number"},{"sl":72,"name":"Md. Moenuddin","designation":"Asst. Director & Regional Manager","location":"Chittagong (South) Region","category":"Region & Area Office","mobile":"01730026359","pin":"0012580405","remarks":""},{"sl":73,"name":"Md. Masudur Rahman","designation":"Sr.Manager (Finance & Acc.)","location":"Chittagong (South) Region","category":"Region & Area Office","mobile":"01730024548","pin":"0005010104","remarks":""},{"sl":74,"name":"Md. Obaidul Haque","designation":"Driver","location":"Chittagong (South) Region","category":"Region & Area Office","mobile":"01730027081","pin":"","remarks":""},{"sl":75,"name":"Prosenjit Mondal","designation":"Sr. Manager & Area Manager","location":"Cox'sbazar Area","category":"Region & Area Office","mobile":"01730026336","pin":"0006910804","remarks":""},{"sl":76,"name":"Purnajoy Chakma","designation":"Sr. Manager & Area Manager","location":"Satkania Area","category":"Region & Area Office","mobile":"01730024583","pin":"0004381003","remarks":""},{"sl":77,"name":"Roman Sarkar","designation":"Sr. Manager & Area Manager","location":"Anowara Area","category":"Region & Area Office","mobile":"01730024571","pin":"","remarks":""},{"sl":78,"name":"Dhiman Kanti Roy","designation":"Sr. Manager & Area Manager","location":"Pekua Area","category":"Region & Area Office","mobile":"01329709610","pin":"","remarks":""},{"sl":79,"name":"Mohammad Mursheduzzaman","designation":"Asst. Director & Regional Manager","location":"B-Baria Region","category":"Region & Area Office","mobile":"01713092978","pin":"0028470507","remarks":""},{"sl":80,"name":"Sipon Kumar Mazi","designation":"Sr.Manager (Finance & Acc.)","location":"B-Baria Region","category":"Region & Area Office","mobile":"01713379241","pin":"0029710607","remarks":""},{"sl":81,"name":"Md. A. Razzak","designation":"Driver","location":"B-Baria Region","category":"Region & Area Office","mobile":"01730027242","pin":"0076490310","remarks":""},{"sl":82,"name":"Md. Montu Islam","designation":"Sr. Manager & Area Manager","location":"Brahmanbaria Area","category":"Region & Area Office","mobile":"01713488893","pin":"0041360108","remarks":""},{"sl":83,"name":"Bishajit Das","designation":"Sr. Manager & Area Manager","location":"Sunamgonj Area","category":"Region & Area Office","mobile":"01713092979","pin":"0010600105","remarks":""},{"sl":84,"name":"Md. Nur-E- Alam Siddique","designation":"Sr. Manager & Area Manager","location":"Bancharampur Area","category":"Region & Area Office","mobile":"01730027041","pin":"0001181001","remarks":""},{"sl":85,"name":"Md. Anowar Hossain","designation":"Sr. Manager & Area Manager","location":"Ashugonj Area","category":"Region & Area Office","mobile":"01730026317","pin":"","remarks":""},{"sl":86,"name":"Md. Abu Hanif","designation":"Sr. Manager & Area Manager","location":"Sylhet Area","category":"Region & Area Office","mobile":"01713249716","pin":"0005810404","remarks":""},{"sl":87,"name":"Md. Amirul Islam","designation":"Sr. Manager & Area Manager","location":"Hobigong Area","category":"Region & Area Office","mobile":"01313426888","pin":"","remarks":""},{"sl":88,"name":"Mohammad Golam Yahia","designation":"Sr. Manager & Area Manager","location":"Tantor Area","category":"Region & Area Office","mobile":"01329709723","pin":"","remarks":""},{"sl":89,"name":"Md. Salimuddin","designation":"Asst. Director & Regional Manager","location":"Dinajpur Region","category":"Region & Area Office","mobile":"01713249706","pin":"0015350206","remarks":""},{"sl":90,"name":"Md. Delowar Hossain","designation":"Sr.Manager (Finance & Acc.)","location":"Dinajpur Region","category":"Region & Area Office","mobile":"01730024540","pin":"0003420703","remarks":""},{"sl":91,"name":"Md. Babul Hossen","designation":"Driver","location":"Dinajpur Region","category":"Region & Area Office","mobile":"01711694922","pin":"","remarks":""},{"sl":92,"name":"Md. Maynul Islam","designation":"Sr. Manager & Area Manager","location":"Birampur Area","category":"Region & Area Office","mobile":"01713092984","pin":"0075280310","remarks":""},{"sl":93,"name":"Md. Abdur Rashid","designation":"Sr. Manager & Area Manager","location":"Dinajpur Area","category":"Region & Area Office","mobile":"01713092991","pin":"0087950511","remarks":""},{"sl":94,"name":"Md. Shafiqul Islam","designation":"Sr. Manager & Area Manager","location":"Birgonj Area","category":"Region & Area Office","mobile":"01730027203","pin":"0075710310","remarks":""},{"sl":95,"name":"Meer Sekender Ali","designation":"Sr. Manager & Area Manager","location":"Syedpur Area","category":"Region & Area Office","mobile":"01730027189","pin":"0020320906","remarks":""},{"sl":96,"name":"Fakhrul Ahmed","designation":"Asst. Director & Regional Manager","location":"Rangpur Region","category":"Region & Area Office","mobile":"01713092997","pin":"0075230310","remarks":""},{"sl":97,"name":"Md. Ramjan Ali","designation":"Sr.Manager (Finance & Acc.)","location":"Rangpur Region","category":"Region & Area Office","mobile":"01777791112","pin":"0032700707","remarks":""},{"sl":98,"name":"Md. Ainul Haque","designation":"Driver","location":"Rangpur Region","category":"Region & Area Office","mobile":"01730027246","pin":"0036431007","remarks":""},{"sl":99,"name":"Md. Safirul Islam","designation":"Sr. Manager & Area Manager","location":"Taragonj Area","category":"Region & Area Office","mobile":"01730024590","pin":"0075270310","remarks":""},{"sl":100,"name":"Md. Sadequl Islam","designation":"Sr. Manager & Area Manager","location":"Rangpur Area","category":"Region & Area Office","mobile":"01713092985","pin":"0075600310","remarks":""},{"sl":101,"name":"Md. Dulu Mia","designation":"Sr. Manager & Area Manager","location":"Patgram Area","category":"Region & Area Office","mobile":"01730027220","pin":"0057140708","remarks":""},{"sl":102,"name":"Md. Abdul Alim","designation":"Sr. Manager & Area Manager","location":"Palashbari Area","category":"Region & Area Office","mobile":"01730026258","pin":"0012680405","remarks":""},{"sl":103,"name":"Md. Saiful Islam","designation":"Sr. Manager & Area Manager","location":"Haragach Area","category":"Region & Area Office","mobile":"01329713494","pin":"","remarks":""},{"sl":104,"name":"Dewan Md. Mirun Hossen","designation":"Asst. Director & Regional Manager","location":"Rajshahi Region","category":"Region & Area Office","mobile":"01730027227","pin":"0075260310","remarks":""},{"sl":105,"name":"Md. Asaduzzaman","designation":"Sr.Manager (HR & Admin)","location":"Rajshahi Region","category":"Region & Area Office","mobile":"01730027137","pin":"0056680708","remarks":""},{"sl":106,"name":"Md. Mosaddak Hossain","designation":"Driver","location":"Rajshahi Region","category":"Region & Area Office","mobile":"01713379347","pin":"","remarks":""},{"sl":107,"name":"A.H.M Firoz","designation":"Sr. Manager & Area Manager","location":"Rajshahi Area","category":"Region & Area Office","mobile":"01713092983","pin":"0009741008","remarks":""},{"sl":108,"name":"Md. Motleb Ali","designation":"Sr. Manager & Area Manager","location":"Puthiya Area","category":"Region & Area Office","mobile":"01730027224","pin":"0057150708","remarks":""},{"sl":109,"name":"Kartik Chandro Sarker","designation":"Sr. Manager & Area Manager","location":"Chapainawabgonj Area","category":"Region & Area Office","mobile":"01713092993","pin":"0039891107","remarks":""},{"sl":110,"name":"Rajib Kumar Mondol","designation":"Sr. Manager & Area Manager","location":"Taherpur Area","category":"Region & Area Office","mobile":"01777791681","pin":"","remarks":""},{"sl":111,"name":"Md. Asraful Alom","designation":"Sr. Manager & Area Manager","location":"Natore Area","category":"Region & Area Office","mobile":"01329709720","pin":"","remarks":""},{"sl":112,"name":"Md. Soharab Hossain","designation":"Asst. Director & Regional Manager","location":"Bogura Region","category":"Region & Area Office","mobile":"01329735090","pin":"","remarks":""},{"sl":113,"name":"Md. Tosiqul Islam","designation":"Manager (Finance & Acc.)","location":"Bogura Region","category":"Region & Area Office","mobile":"01329735091","pin":"","remarks":""},{"sl":114,"name":"Most. Roni Khatun","designation":"Asst. Manager (HR & Admin)","location":"Bogura Region","category":"Region & Area Office","mobile":"01329668290","pin":"","remarks":""},{"sl":115,"name":"Md. Rezaul Islam","designation":"Driver","location":"Bogura Region","category":"Region & Area Office","mobile":"01329668078","pin":"","remarks":""},{"sl":116,"name":"Md. Rokibul Islam","designation":"Sr. Manager & Area Manager","location":"Bogra Area","category":"Region & Area Office","mobile":"01730026230","pin":"","remarks":""},{"sl":117,"name":"Md. Rafiqul Kabir","designation":"Sr. Manager & Area Manager","location":"Noagaon Area","category":"Region & Area Office","mobile":"01329713477","pin":"","remarks":""},{"sl":118,"name":"Md. Moniruzzaman Khan","designation":"Sr. Manager & Area Manager","location":"Joypurhat Area","category":"Region & Area Office","mobile":"01329735070","pin":"","remarks":""},{"sl":119,"name":"Md. Shofiqul Islam","designation":"Asst. Director & Regional Manager","location":"Faridpur Region","category":"Region & Area Office","mobile":"01730026356","pin":"0002071002","remarks":""},{"sl":120,"name":"Md. Moniruzzaman","designation":"Manager ( HR & Admin)","location":"Faridpur Region","category":"Region & Area Office","mobile":"01313427003","pin":"0000030592","remarks":""},{"sl":121,"name":"Md. Jahurul Islam","designation":"Manager (Finance & Acc.)","location":"Faridpur Region","category":"Region & Area Office","mobile":"01730024574","pin":"","remarks":""},{"sl":122,"name":"S.M. Nayan Shohag","designation":"Driver","location":"Faridpur Region","category":"Region & Area Office","mobile":"01713249681","pin":"","remarks":""},{"sl":123,"name":"Md. Anwarul Islam","designation":"Sr. Manager & Area Manager","location":"Gopalgonj Area","category":"Region & Area Office","mobile":"01713092975","pin":"0000201298","remarks":""},{"sl":124,"name":"Shamim Ahammad","designation":"Sr. Manager & Area Manager","location":"Magura Area","category":"Region & Area Office","mobile":"01713092987","pin":"0003890903","remarks":""},{"sl":125,"name":"Md. Abdul Kader","designation":"Sr. Manager & Area Manager","location":"Faridpur Area","category":"Region & Area Office","mobile":"01730024535","pin":"0075680310","remarks":""},{"sl":126,"name":"Md. Zakir Hosain","designation":"Sr. Manager & Area Manager","location":"Bhanga Area (PME)","category":"Region & Area Office","mobile":"01335172521","pin":"","remarks":""},{"sl":127,"name":"Md. Abdul Halim","designation":"Sr. Manager & Area Manager","location":"Bhanga Area (PMF)","category":"Region & Area Office","mobile":"01329713440","pin":"","remarks":""},{"sl":128,"name":"Lokman Hakim","designation":"Asst. Director & Regional Manager","location":"Jashore Region","category":"Region & Area Office","mobile":"01713092994","pin":"0034450807","remarks":""},{"sl":129,"name":"Md. Abul Kalam","designation":"Asst. Director (Monitoring)","location":"Jashore Region","category":"Region & Area Office","mobile":"01335105750","pin":"","remarks":""},{"sl":130,"name":"Shaleha Parveen","designation":"Sr. Manager (HR & Admin)","location":"Jashore Region","category":"Region & Area Office","mobile":"01329735028","pin":"","remarks":""},{"sl":131,"name":"Md. Shamim Hossain","designation":"Manager (Finance & Acc.)","location":"Jashore Region","category":"Region & Area Office","mobile":"01730024545","pin":"0006090704","remarks":""},{"sl":132,"name":"Md. Nazrul Islam","designation":"Driver","location":"Jashore Region","category":"Region & Area Office","mobile":"01713249715","pin":"","remarks":""},{"sl":133,"name":"Uzzal Kumar Ridy","designation":"Sr. Manager & Area Manager","location":"Jashore Area","category":"Region & Area Office","mobile":"01713092988","pin":"0009031004","remarks":""},{"sl":134,"name":"Md. Rezaul Karim","designation":"Sr. Manager & Area Manager","location":"Jehanidha Area","category":"Region & Area Office","mobile":"01713379256","pin":"0084101210","remarks":""},{"sl":135,"name":"Md. Hasanur Rahman","designation":"Sr. Manager & Area Manager","location":"Khulna Area","category":"Region & Area Office","mobile":"01730026305","pin":"0020310906","remarks":""},{"sl":136,"name":"Md. Monirul Islam","designation":"Sr. Manager & Area Manager","location":"Jhekorgacha Area","category":"Region & Area Office","mobile":"01730024578","pin":"","remarks":""},{"sl":137,"name":"Md. Kawshar","designation":"Sr. Manager & Area Manager","location":"Kaliganj Area","category":"Region & Area Office","mobile":"01329735023","pin":"","remarks":""},{"sl":138,"name":"Md. Jalal Uddin","designation":"Asst. Director & Regional Manager","location":"Kushtia Region","category":"Region & Area Office","mobile":"01329735030","pin":"","remarks":""},{"sl":139,"name":"Md. Salman Shah Noyan","designation":"Manager (Finance & Acc.)","location":"Kushtia Region","category":"Region & Area Office","mobile":"01329735022","pin":"","remarks":""},{"sl":140,"name":"Md. Mukter Hossain","designation":"Driver","location":"Kushtia Region","category":"Region & Area Office","mobile":"01329735151","pin":"","remarks":""},{"sl":141,"name":"Jahidul Islam","designation":"Sr. Manager & Area Manager","location":"Maherpur Area","category":"Region & Area Office","mobile":"01713092989","pin":"0003880903","remarks":""},{"sl":142,"name":"Md. Ahasanul Huque","designation":"Sr. Manager & Area Manager","location":"Kushtia Area","category":"Region & Area Office","mobile":"01329709651","pin":"","remarks":""},{"sl":143,"name":"Md. Shariful Islam","designation":"Sr. Manager & Area Manager","location":"Chuadanga Area","category":"Region & Area Office","mobile":"01329735029","pin":"","remarks":""},{"sl":144,"name":"Md. Nasir Uddin","designation":"Asst. Director & Regional Manager","location":"Comilla Region","category":"Region & Area Office","mobile":"01730393000","pin":"","remarks":""},{"sl":145,"name":"Md. Naion Akon","designation":"Manager (Finance & Acc.)","location":"Comilla Region","category":"Region & Area Office","mobile":"01777791547","pin":"","remarks":""},{"sl":146,"name":"B. M. Sayefur Rahman Showkat","designation":"Sr. Manager (HR & Admin)","location":"Comilla Region","category":"Region & Area Office","mobile":"01335105646","pin":"","remarks":""},{"sl":147,"name":"Md. Nayan Patuary","designation":"Driver","location":"Comilla Region","category":"Region & Area Office","mobile":"01329713535","pin":"","remarks":""},{"sl":148,"name":"Goutam Shikder","designation":"Sr. Manager & Area Manager","location":"Feni Area","category":"Region & Area Office","mobile":"01713092977","pin":"","remarks":""},{"sl":149,"name":"Md. Abdur Rahim","designation":"Sr. Manager & Area Manager","location":"Cumilla Area","category":"Region & Area Office","mobile":"01777791242","pin":"","remarks":""},{"sl":150,"name":"Md. Kamruzzaman","designation":"Sr. Manager & Area Manager","location":"Noakhali Area","category":"Region & Area Office","mobile":"01777791245","pin":"","remarks":""},{"sl":151,"name":"Md. Ashraful Islam","designation":"Sr. Manager & Area Manager","location":"Chadpur Area","category":"Region & Area Office","mobile":"01777791247","pin":"","remarks":""},{"sl":152,"name":"Nazida Khatun","designation":"Sr. Manager & Area Manager","location":"Laxsum Area (PME)","category":"Region & Area Office","mobile":"01777791249","pin":"","remarks":""},{"sl":153,"name":"Jaylal Das","designation":"Sr. Manager & Area Manager","location":"Laxsum Area (PMF)","category":"Region & Area Office","mobile":"01335105645","pin":"","remarks":""},{"sl":154,"name":"Md. Jahir Alam","designation":"Sr. Manager & Area Manager","location":"Homna Area","category":"Region & Area Office","mobile":"01777791261","pin":"","remarks":""},{"sl":155,"name":"Md. Abdul Malek","designation":"Sr. Manager & Area Manager","location":"Lakshmipur Area","category":"Region & Area Office","mobile":"01329713521","pin":"","remarks":""},{"sl":156,"name":"Sanuar Kabir","designation":"Asst. Director & Regional Manager","location":"Kishoregonj Region","category":"Region & Area Office","mobile":"01713379230","pin":"","remarks":""},{"sl":157,"name":"Md. Abu Rayhan","designation":"Manager (Finance & Acc.)","location":"Kishoregonj Region","category":"Region & Area Office","mobile":"01777791191","pin":"","remarks":""},{"sl":158,"name":"Md. Billal Hossain","designation":"Manager (HR & Admin)","location":"Kishoregonj Region","category":"Region & Area Office","mobile":"01329709571","pin":"","remarks":""},{"sl":159,"name":"Md. Sohel Hossen Raju","designation":"Driver","location":"Kishoregonj Region","category":"Region & Area Office","mobile":"01329701555","pin":"","remarks":""},{"sl":160,"name":"Md. Abdur Rahman","designation":"Sr. Manager & Area Manager","location":"Netrakona Area","category":"Region & Area Office","mobile":"01713379211","pin":"","remarks":""},{"sl":161,"name":"Prodip Chandra Das","designation":"Sr. Manager & Area Manager","location":"Bajitpur Area","category":"Region & Area Office","mobile":"01713249731","pin":"","remarks":""},{"sl":162,"name":"Md. Anarul Islam","designation":"Sr. Manager & Area Manager","location":"Kishoregonj Area","category":"Region & Area Office","mobile":"01329735042","pin":"","remarks":""},{"sl":163,"name":"","designation":"Branch Manager","location":"Branch 1","category":"Branch (BM - Bundle 17)","mobile":"01713379403","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":164,"name":"","designation":"Branch Manager","location":"Branch 2","category":"Branch (BM - Bundle 17)","mobile":"01713379395","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":165,"name":"","designation":"Branch Manager","location":"Branch 3","category":"Branch (BM - Bundle 17)","mobile":"01730026304","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":166,"name":"","designation":"Branch Manager","location":"Branch 4","category":"Branch (BM - Bundle 17)","mobile":"01730026303","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":167,"name":"","designation":"Branch Manager","location":"Branch 5","category":"Branch (BM - Bundle 17)","mobile":"01730026302","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":168,"name":"","designation":"Branch Manager","location":"Branch 6","category":"Branch (BM - Bundle 17)","mobile":"01729065300","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":169,"name":"","designation":"Branch Manager","location":"Branch 7","category":"Branch (BM - Bundle 17)","mobile":"01713379400","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":170,"name":"","designation":"Branch Manager","location":"Branch 8","category":"Branch (BM - Bundle 17)","mobile":"01713379274","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":171,"name":"","designation":"Branch Manager","location":"Branch 9","category":"Branch (BM - Bundle 17)","mobile":"01713379402","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":172,"name":"","designation":"Branch Manager","location":"Branch 10","category":"Branch (BM - Bundle 17)","mobile":"01713379398","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":173,"name":"","designation":"Branch Manager","location":"Branch 11","category":"Branch (BM - Bundle 17)","mobile":"01730027298","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":174,"name":"","designation":"Branch Manager","location":"Branch 12","category":"Branch (BM - Bundle 17)","mobile":"01713379399","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":175,"name":"","designation":"Branch Manager","location":"Branch 13","category":"Branch (BM - Bundle 17)","mobile":"01335172514","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":176,"name":"","designation":"Branch Manager","location":"Branch 14","category":"Branch (BM - Bundle 17)","mobile":"01713379329","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":177,"name":"","designation":"Branch Manager","location":"Branch 15","category":"Branch (BM - Bundle 17)","mobile":"01713379396","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":178,"name":"","designation":"Branch Manager","location":"Branch 16","category":"Branch (BM - Bundle 17)","mobile":"01777791510","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":179,"name":"","designation":"Branch Manager","location":"Branch 17","category":"Branch (BM - Bundle 17)","mobile":"01730027284","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":180,"name":"","designation":"Branch Manager","location":"Branch 18","category":"Branch (BM - Bundle 17)","mobile":"01713379397","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":181,"name":"","designation":"Branch Manager","location":"Branch 19","category":"Branch (BM - Bundle 17)","mobile":"01713379401","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":182,"name":"","designation":"Branch Manager","location":"Branch 20","category":"Branch (BM - Bundle 17)","mobile":"01329713376","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":183,"name":"","designation":"Branch Manager","location":"Branch 21","category":"Branch (BM - Bundle 17)","mobile":"01329713377","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":184,"name":"","designation":"Branch Manager","location":"Branch 22","category":"Branch (BM - Bundle 17)","mobile":"01329713375","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":185,"name":"","designation":"Branch Manager","location":"Branch 23","category":"Branch (BM - Bundle 17)","mobile":"01329713374","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":186,"name":"","designation":"Branch Manager","location":"Branch 24","category":"Branch (BM - Bundle 17)","mobile":"01713379248","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":187,"name":"","designation":"Branch Manager","location":"Branch 25","category":"Branch (BM - Bundle 17)","mobile":"01713379250","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":188,"name":"","designation":"Branch Manager","location":"Branch 26","category":"Branch (BM - Bundle 17)","mobile":"01730027275","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":189,"name":"","designation":"Branch Manager","location":"Branch 27","category":"Branch (BM - Bundle 17)","mobile":"01713092970","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":190,"name":"","designation":"Branch Manager","location":"Branch 28","category":"Branch (BM - Bundle 17)","mobile":"01329735285","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":191,"name":"","designation":"Branch Manager","location":"Branch 29","category":"Branch (BM - Bundle 17)","mobile":"01329709360","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":192,"name":"","designation":"Branch Manager","location":"Branch 30","category":"Branch (BM - Bundle 17)","mobile":"01713379302","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":193,"name":"","designation":"Branch Manager","location":"Branch 31","category":"Branch (BM - Bundle 17)","mobile":"01713379356","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":194,"name":"","designation":"Branch Manager","location":"Branch 32","category":"Branch (BM - Bundle 17)","mobile":"01713379354","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":195,"name":"","designation":"Branch Manager","location":"Branch 33","category":"Branch (BM - Bundle 17)","mobile":"01713379355","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":196,"name":"","designation":"Branch Manager","location":"Branch 34","category":"Branch (BM - Bundle 17)","mobile":"01729064942","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":197,"name":"","designation":"Branch Manager","location":"Branch 35","category":"Branch (BM - Bundle 17)","mobile":"01713379247","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":198,"name":"","designation":"Branch Manager","location":"Branch 36","category":"Branch (BM - Bundle 17)","mobile":"01322838644","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":199,"name":"","designation":"Branch Manager","location":"Branch 37","category":"Branch (BM - Bundle 17)","mobile":"01713379246","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":200,"name":"","designation":"Branch Manager","location":"Branch 38","category":"Branch (BM - Bundle 17)","mobile":"01713379249","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":201,"name":"","designation":"Branch Manager","location":"Branch 39","category":"Branch (BM - Bundle 17)","mobile":"01713379299","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":202,"name":"","designation":"Branch Manager","location":"Branch 40","category":"Branch (BM - Bundle 17)","mobile":"01329709725","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":203,"name":"","designation":"Branch Manager","location":"Branch 41","category":"Branch (BM - Bundle 17)","mobile":"01713379357","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":204,"name":"","designation":"Branch Manager","location":"Branch 42","category":"Branch (BM - Bundle 17)","mobile":"01329735277","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":205,"name":"","designation":"Branch Manager","location":"Branch 43","category":"Branch (BM - Bundle 17)","mobile":"01713379297","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":206,"name":"","designation":"Branch Manager","location":"Branch 44","category":"Branch (BM - Bundle 17)","mobile":"01777791295","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":207,"name":"","designation":"Branch Manager","location":"Branch 45","category":"Branch (BM - Bundle 17)","mobile":"01713379360","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":208,"name":"","designation":"Branch Manager","location":"Branch 46","category":"Branch (BM - Bundle 17)","mobile":"01713379235","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":209,"name":"","designation":"Branch Manager","location":"Branch 47","category":"Branch (BM - Bundle 17)","mobile":"01713379303","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":210,"name":"","designation":"Branch Manager","location":"Branch 48","category":"Branch (BM - Bundle 17)","mobile":"01713379359","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":211,"name":"","designation":"Branch Manager","location":"Branch 49","category":"Branch (BM - Bundle 17)","mobile":"01313426768","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":212,"name":"","designation":"Branch Manager","location":"Branch 50","category":"Branch (BM - Bundle 17)","mobile":"01313426844","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":213,"name":"","designation":"Branch Manager","location":"Branch 51","category":"Branch (BM - Bundle 17)","mobile":"01313426788","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":214,"name":"","designation":"Branch Manager","location":"Branch 52","category":"Branch (BM - Bundle 17)","mobile":"01730027273","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":215,"name":"","designation":"Branch Manager","location":"Branch 53","category":"Branch (BM - Bundle 17)","mobile":"01329735275","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":216,"name":"","designation":"Branch Manager","location":"Branch 54","category":"Branch (BM - Bundle 17)","mobile":"01322838648","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":217,"name":"","designation":"Branch Manager","location":"Branch 55","category":"Branch (BM - Bundle 17)","mobile":"01713379353","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":218,"name":"","designation":"Branch Manager","location":"Branch 56","category":"Branch (BM - Bundle 17)","mobile":"01730026334","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":219,"name":"","designation":"Branch Manager","location":"Branch 57","category":"Branch (BM - Bundle 17)","mobile":"01713379358","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":220,"name":"","designation":"Branch Manager","location":"Branch 58","category":"Branch (BM - Bundle 17)","mobile":"01329709724","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":221,"name":"","designation":"Branch Manager","location":"Branch 59","category":"Branch (BM - Bundle 17)","mobile":"01730050763","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":222,"name":"","designation":"Branch Manager","location":"Branch 60","category":"Branch (BM - Bundle 17)","mobile":"01730027030","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":223,"name":"","designation":"Branch Manager","location":"Branch 61","category":"Branch (BM - Bundle 17)","mobile":"01777791643","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":224,"name":"","designation":"Branch Manager","location":"Branch 62","category":"Branch (BM - Bundle 17)","mobile":"01713379404","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":225,"name":"","designation":"Branch Manager","location":"Branch 63","category":"Branch (BM - Bundle 17)","mobile":"01713379349","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":226,"name":"","designation":"Branch Manager","location":"Branch 64","category":"Branch (BM - Bundle 17)","mobile":"01713379343","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":227,"name":"","designation":"Branch Manager","location":"Branch 65","category":"Branch (BM - Bundle 17)","mobile":"01713379345","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":228,"name":"","designation":"Branch Manager","location":"Branch 66","category":"Branch (BM - Bundle 17)","mobile":"01777791566","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":229,"name":"","designation":"Branch Manager","location":"Branch 67","category":"Branch (BM - Bundle 17)","mobile":"01730027025","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":230,"name":"","designation":"Branch Manager","location":"Branch 68","category":"Branch (BM - Bundle 17)","mobile":"01777791644","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":231,"name":"","designation":"Branch Manager","location":"Branch 69","category":"Branch (BM - Bundle 17)","mobile":"01730024570","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":232,"name":"","designation":"Branch Manager","location":"Branch 70","category":"Branch (BM - Bundle 17)","mobile":"01335105728","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":233,"name":"","designation":"Branch Manager","location":"Branch 71","category":"Branch (BM - Bundle 17)","mobile":"01713379348","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":234,"name":"","designation":"Branch Manager","location":"Branch 72","category":"Branch (BM - Bundle 17)","mobile":"01329709642","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":235,"name":"","designation":"Branch Manager","location":"Branch 73","category":"Branch (BM - Bundle 17)","mobile":"01713379228","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":236,"name":"","designation":"Branch Manager","location":"Branch 74","category":"Branch (BM - Bundle 17)","mobile":"01713379344","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":237,"name":"","designation":"Branch Manager","location":"Branch 75","category":"Branch (BM - Bundle 17)","mobile":"01335105727","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":238,"name":"","designation":"Branch Manager","location":"Branch 76","category":"Branch (BM - Bundle 17)","mobile":"01322838703","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":239,"name":"","designation":"Branch Manager","location":"Branch 77","category":"Branch (BM - Bundle 17)","mobile":"01730024568","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":240,"name":"","designation":"Branch Manager","location":"Branch 78","category":"Branch (BM - Bundle 17)","mobile":"01335105729","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":241,"name":"","designation":"Branch Manager","location":"Branch 79","category":"Branch (BM - Bundle 17)","mobile":"01730026900","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":242,"name":"","designation":"Branch Manager","location":"Branch 80","category":"Branch (BM - Bundle 17)","mobile":"01329713484","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":243,"name":"","designation":"Branch Manager","location":"Branch 81","category":"Branch (BM - Bundle 17)","mobile":"01329713486","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":244,"name":"","designation":"Branch Manager","location":"Branch 82","category":"Branch (BM - Bundle 17)","mobile":"01329713478","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":245,"name":"","designation":"Branch Manager","location":"Branch 83","category":"Branch (BM - Bundle 17)","mobile":"01329713481","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":246,"name":"","designation":"Branch Manager","location":"Branch 84","category":"Branch (BM - Bundle 17)","mobile":"01329735071","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":247,"name":"","designation":"Branch Manager","location":"Branch 85","category":"Branch (BM - Bundle 17)","mobile":"01329735074","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":248,"name":"","designation":"Branch Manager","location":"Branch 86","category":"Branch (BM - Bundle 17)","mobile":"01329735077","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":249,"name":"","designation":"Branch Manager","location":"Branch 87","category":"Branch (BM - Bundle 17)","mobile":"01329668080","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":250,"name":"","designation":"Branch Manager","location":"Branch 88","category":"Branch (BM - Bundle 17)","mobile":"01329735268","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":251,"name":"","designation":"Branch Manager","location":"Branch 89","category":"Branch (BM - Bundle 17)","mobile":"01322838695","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":252,"name":"","designation":"Branch Manager","location":"Branch 90","category":"Branch (BM - Bundle 17)","mobile":"01729065027","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":253,"name":"","designation":"Branch Manager","location":"Branch 91","category":"Branch (BM - Bundle 17)","mobile":"01322838697","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":254,"name":"","designation":"Branch Manager","location":"Branch 92","category":"Branch (BM - Bundle 17)","mobile":"01329701882","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":255,"name":"","designation":"Branch Manager","location":"Branch 93","category":"Branch (BM - Bundle 17)","mobile":"01729065195","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":256,"name":"","designation":"Branch Manager","location":"Branch 94","category":"Branch (BM - Bundle 17)","mobile":"01729065225","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":257,"name":"","designation":"Branch Manager","location":"Branch 95","category":"Branch (BM - Bundle 17)","mobile":"01709334286","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":258,"name":"","designation":"Branch Manager","location":"Branch 96","category":"Branch (BM - Bundle 17)","mobile":"01730027015","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":259,"name":"","designation":"Branch Manager","location":"Branch 97","category":"Branch (BM - Bundle 17)","mobile":"01730024559","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":260,"name":"","designation":"Branch Manager","location":"Branch 98","category":"Branch (BM - Bundle 17)","mobile":"01730026311","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":261,"name":"","designation":"Branch Manager","location":"Branch 99","category":"Branch (BM - Bundle 17)","mobile":"01729065197","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":262,"name":"","designation":"Branch Manager","location":"Branch 100","category":"Branch (BM - Bundle 17)","mobile":"01329709533","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":263,"name":"","designation":"Branch Manager","location":"Branch 101","category":"Branch (BM - Bundle 17)","mobile":"01713379323","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":264,"name":"","designation":"Branch Manager","location":"Branch 102","category":"Branch (BM - Bundle 17)","mobile":"01713379321","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":265,"name":"","designation":"Branch Manager","location":"Branch 103","category":"Branch (BM - Bundle 17)","mobile":"01713379322","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":266,"name":"","designation":"Branch Manager","location":"Branch 104","category":"Branch (BM - Bundle 17)","mobile":"01329735112","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":267,"name":"","designation":"Branch Manager","location":"Branch 105","category":"Branch (BM - Bundle 17)","mobile":"01713379232","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":268,"name":"","designation":"Branch Manager","location":"Branch 106","category":"Branch (BM - Bundle 17)","mobile":"01713379326","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":269,"name":"","designation":"Branch Manager","location":"Branch 107","category":"Branch (BM - Bundle 17)","mobile":"01713379324","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":270,"name":"","designation":"Branch Manager","location":"Branch 108","category":"Branch (BM - Bundle 17)","mobile":"01730027077","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":271,"name":"","designation":"Branch Manager","location":"Branch 109","category":"Branch (BM - Bundle 17)","mobile":"01777791464","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":272,"name":"","designation":"Branch Manager","location":"Branch 110","category":"Branch (BM - Bundle 17)","mobile":"01730027215","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":273,"name":"","designation":"Branch Manager","location":"Branch 111","category":"Branch (BM - Bundle 17)","mobile":"01313427004","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":274,"name":"","designation":"Branch Manager","location":"Branch 112","category":"Branch (BM - Bundle 17)","mobile":"01730027279","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":275,"name":"","designation":"Branch Manager","location":"Branch 113","category":"Branch (BM - Bundle 17)","mobile":"01713379320","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":276,"name":"","designation":"Branch Manager","location":"Branch 114","category":"Branch (BM - Bundle 17)","mobile":"01777791613","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":277,"name":"","designation":"Branch Manager","location":"Branch 115","category":"Branch (BM - Bundle 17)","mobile":"01329668088","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":278,"name":"","designation":"Branch Manager","location":"Branch 116","category":"Branch (BM - Bundle 17)","mobile":"01730027083","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":279,"name":"","designation":"Branch Manager","location":"Branch 117","category":"Branch (BM - Bundle 17)","mobile":"01730024523","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":280,"name":"","designation":"Branch Manager","location":"Branch 118","category":"Branch (BM - Bundle 17)","mobile":"01713092960","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":281,"name":"","designation":"Branch Manager","location":"Branch 119","category":"Branch (BM - Bundle 17)","mobile":"01730026335","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":282,"name":"","designation":"Branch Manager","location":"Branch 120","category":"Branch (BM - Bundle 17)","mobile":"01730027286","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":283,"name":"","designation":"Branch Manager","location":"Branch 121","category":"Branch (BM - Bundle 17)","mobile":"01730027011","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":284,"name":"","designation":"Branch Manager","location":"Branch 122","category":"Branch (BM - Bundle 17)","mobile":"01322838642","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":285,"name":"","designation":"Branch Manager","location":"Branch 123","category":"Branch (BM - Bundle 17)","mobile":"01329734985","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":286,"name":"","designation":"Branch Manager","location":"Branch 124","category":"Branch (BM - Bundle 17)","mobile":"01730027250","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":287,"name":"","designation":"Branch Manager","location":"Branch 125","category":"Branch (BM - Bundle 17)","mobile":"01730024528","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":288,"name":"","designation":"Branch Manager","location":"Branch 126","category":"Branch (BM - Bundle 17)","mobile":"01313426878","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":289,"name":"","designation":"Branch Manager","location":"Branch 127","category":"Branch (BM - Bundle 17)","mobile":"01730027282","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":290,"name":"","designation":"Branch Manager","location":"Branch 128","category":"Branch (BM - Bundle 17)","mobile":"01730026344","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":291,"name":"","designation":"Branch Manager","location":"Branch 129","category":"Branch (BM - Bundle 17)","mobile":"01313427007","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":292,"name":"","designation":"Branch Manager","location":"Branch 130","category":"Branch (BM - Bundle 17)","mobile":"01730024587","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":293,"name":"","designation":"Branch Manager","location":"Branch 131","category":"Branch (BM - Bundle 17)","mobile":"01730024586","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":294,"name":"","designation":"Branch Manager","location":"Branch 132","category":"Branch (BM - Bundle 17)","mobile":"01313426883","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":295,"name":"","designation":"Branch Manager","location":"Branch 133","category":"Branch (BM - Bundle 17)","mobile":"01777791600","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":296,"name":"","designation":"Branch Manager","location":"Branch 134","category":"Branch (BM - Bundle 17)","mobile":"01713379325","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":297,"name":"","designation":"Branch Manager","location":"Branch 135","category":"Branch (BM - Bundle 17)","mobile":"01713379327","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":298,"name":"","designation":"Branch Manager","location":"Branch 136","category":"Branch (BM - Bundle 17)","mobile":"01713999004","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":299,"name":"","designation":"Branch Manager","location":"Branch 137","category":"Branch (BM - Bundle 17)","mobile":"01713379300","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":300,"name":"","designation":"Branch Manager","location":"Branch 138","category":"Branch (BM - Bundle 17)","mobile":"01713379301","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":301,"name":"","designation":"Branch Manager","location":"Branch 139","category":"Branch (BM - Bundle 17)","mobile":"01730024542","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":302,"name":"","designation":"Branch Manager","location":"Branch 140","category":"Branch (BM - Bundle 17)","mobile":"01777791290","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":303,"name":"","designation":"Branch Manager","location":"Branch 141","category":"Branch (BM - Bundle 17)","mobile":"01729064949","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":304,"name":"","designation":"Branch Manager","location":"Branch 142","category":"Branch (BM - Bundle 17)","mobile":"01713379291","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":305,"name":"","designation":"Branch Manager","location":"Branch 143","category":"Branch (BM - Bundle 17)","mobile":"01713379293","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":306,"name":"","designation":"Branch Manager","location":"Branch 144","category":"Branch (BM - Bundle 17)","mobile":"01713379294","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":307,"name":"","designation":"Branch Manager","location":"Branch 145","category":"Branch (BM - Bundle 17)","mobile":"01777791285","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":308,"name":"","designation":"Branch Manager","location":"Branch 146","category":"Branch (BM - Bundle 17)","mobile":"01713379295","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":309,"name":"","designation":"Branch Manager","location":"Branch 147","category":"Branch (BM - Bundle 17)","mobile":"01777791311","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":310,"name":"","designation":"Branch Manager","location":"Branch 148","category":"Branch (BM - Bundle 17)","mobile":"01777791347","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":311,"name":"","designation":"Branch Manager","location":"Branch 149","category":"Branch (BM - Bundle 17)","mobile":"01777791342","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":312,"name":"","designation":"Branch Manager","location":"Branch 150","category":"Branch (BM - Bundle 17)","mobile":"01713379296","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":313,"name":"","designation":"Branch Manager","location":"Branch 151","category":"Branch (BM - Bundle 17)","mobile":"01777791316","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":314,"name":"","designation":"Branch Manager","location":"Branch 152","category":"Branch (BM - Bundle 17)","mobile":"01777791326","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":315,"name":"","designation":"Branch Manager","location":"Branch 153","category":"Branch (BM - Bundle 17)","mobile":"01729064951","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":316,"name":"","designation":"Branch Manager","location":"Branch 154","category":"Branch (BM - Bundle 17)","mobile":"01322838646","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":317,"name":"","designation":"Branch Manager","location":"Branch 155","category":"Branch (BM - Bundle 17)","mobile":"01777791255","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":318,"name":"","designation":"Branch Manager","location":"Branch 156","category":"Branch (BM - Bundle 17)","mobile":"01777791357","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":319,"name":"","designation":"Branch Manager","location":"Branch 157","category":"Branch (BM - Bundle 17)","mobile":"01313426869","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":320,"name":"","designation":"Branch Manager","location":"Branch 158","category":"Branch (BM - Bundle 17)","mobile":"01777791263","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":321,"name":"","designation":"Branch Manager","location":"Branch 159","category":"Branch (BM - Bundle 17)","mobile":"01777791266","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":322,"name":"","designation":"Branch Manager","location":"Branch 160","category":"Branch (BM - Bundle 17)","mobile":"01729064945","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":323,"name":"","designation":"Branch Manager","location":"Branch 161","category":"Branch (BM - Bundle 17)","mobile":"01777791331","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":324,"name":"","designation":"Branch Manager","location":"Branch 162","category":"Branch (BM - Bundle 17)","mobile":"01729064969","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":325,"name":"","designation":"Branch Manager","location":"Branch 163","category":"Branch (BM - Bundle 17)","mobile":"01729064959","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":326,"name":"","designation":"Branch Manager","location":"Branch 164","category":"Branch (BM - Bundle 17)","mobile":"01729064956","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":327,"name":"","designation":"Branch Manager","location":"Branch 165","category":"Branch (BM - Bundle 17)","mobile":"01777791350","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":328,"name":"","designation":"Branch Manager","location":"Branch 166","category":"Branch (BM - Bundle 17)","mobile":"01777791346","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":329,"name":"","designation":"Branch Manager","location":"Branch 167","category":"Branch (BM - Bundle 17)","mobile":"01329713520","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":330,"name":"","designation":"Branch Manager","location":"Branch 168","category":"Branch (BM - Bundle 17)","mobile":"01322838701","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":331,"name":"","designation":"Branch Manager","location":"Branch 169","category":"Branch (BM - Bundle 17)","mobile":"01730793132","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":332,"name":"","designation":"Branch Manager","location":"Branch 170","category":"Branch (BM - Bundle 17)","mobile":"01730793089","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":333,"name":"","designation":"Branch Manager","location":"Branch 171","category":"Branch (BM - Bundle 17)","mobile":"01730793056","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":334,"name":"","designation":"Branch Manager","location":"Branch 172","category":"Branch (BM - Bundle 17)","mobile":"01730793148","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":335,"name":"","designation":"Branch Manager","location":"Branch 173","category":"Branch (BM - Bundle 17)","mobile":"01730793060","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":336,"name":"","designation":"Branch Manager","location":"Branch 174","category":"Branch (BM - Bundle 17)","mobile":"01730793084","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":337,"name":"","designation":"Branch Manager","location":"Branch 175","category":"Branch (BM - Bundle 17)","mobile":"01730793128","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":338,"name":"","designation":"Branch Manager","location":"Branch 176","category":"Branch (BM - Bundle 17)","mobile":"01730793079","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":339,"name":"","designation":"Branch Manager","location":"Branch 177","category":"Branch (BM - Bundle 17)","mobile":"01730793051","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":340,"name":"","designation":"Branch Manager","location":"Branch 178","category":"Branch (BM - Bundle 17)","mobile":"01730793074","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":341,"name":"","designation":"Branch Manager","location":"Branch 179","category":"Branch (BM - Bundle 17)","mobile":"01730793138","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":342,"name":"","designation":"Branch Manager","location":"Branch 180","category":"Branch (BM - Bundle 17)","mobile":"01730793070","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":343,"name":"","designation":"Branch Manager","location":"Branch 181","category":"Branch (BM - Bundle 17)","mobile":"01730793122","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":344,"name":"","designation":"Branch Manager","location":"Branch 182","category":"Branch (BM - Bundle 17)","mobile":"01730793066","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":345,"name":"","designation":"Branch Manager","location":"Branch 183","category":"Branch (BM - Bundle 17)","mobile":"01730793034","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":346,"name":"","designation":"Branch Manager","location":"Branch 184","category":"Branch (BM - Bundle 17)","mobile":"01730793043","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":347,"name":"","designation":"Branch Manager","location":"Branch 185","category":"Branch (BM - Bundle 17)","mobile":"01730793039","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":348,"name":"","designation":"Branch Manager","location":"Branch 186","category":"Branch (BM - Bundle 17)","mobile":"01730793029","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":349,"name":"","designation":"Branch Manager","location":"Branch 187","category":"Branch (BM - Bundle 17)","mobile":"01730793047","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":350,"name":"","designation":"Branch Manager","location":"Branch 188","category":"Branch (BM - Bundle 17)","mobile":"01313426970","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":351,"name":"","designation":"Branch Manager","location":"Branch 189","category":"Branch (BM - Bundle 17)","mobile":"01730793019","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":352,"name":"","designation":"Branch Manager","location":"Branch 190","category":"Branch (BM - Bundle 17)","mobile":"01709334332","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":353,"name":"","designation":"Branch Manager","location":"Branch 191","category":"Branch (BM - Bundle 17)","mobile":"01730793015","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":354,"name":"","designation":"Branch Manager","location":"Branch 192","category":"Branch (BM - Bundle 17)","mobile":"01730793005","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":355,"name":"","designation":"Branch Manager","location":"Branch 193","category":"Branch (BM - Bundle 17)","mobile":"01329668291","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":356,"name":"","designation":"Branch Manager","location":"Branch 194","category":"Branch (BM - Bundle 17)","mobile":"01713379389","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":357,"name":"","designation":"Branch Manager","location":"Branch 195","category":"Branch (BM - Bundle 17)","mobile":"01730793024","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":358,"name":"","designation":"Branch Manager","location":"Branch 196","category":"Branch (BM - Bundle 17)","mobile":"01730793092","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":359,"name":"","designation":"Branch Manager","location":"Branch 197","category":"Branch (BM - Bundle 17)","mobile":"01730793094","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":360,"name":"","designation":"Branch Manager","location":"Branch 198","category":"Branch (BM - Bundle 17)","mobile":"01730793096","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":361,"name":"","designation":"Branch Manager","location":"Branch 199","category":"Branch (BM - Bundle 17)","mobile":"01777791587","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":362,"name":"","designation":"Branch Manager","location":"Branch 200","category":"Branch (BM - Bundle 17)","mobile":"01777791584","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":363,"name":"","designation":"Branch Manager","location":"Branch 201","category":"Branch (BM - Bundle 17)","mobile":"01729065198","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":364,"name":"","designation":"Branch Manager","location":"Branch 202","category":"Branch (BM - Bundle 17)","mobile":"01313426905","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":365,"name":"","designation":"Branch Manager","location":"Branch 203","category":"Branch (BM - Bundle 17)","mobile":"01730026343","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":366,"name":"","designation":"Branch Manager","location":"Branch 204","category":"Branch (BM - Bundle 17)","mobile":"01322838708","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":367,"name":"","designation":"Branch Manager","location":"Branch 205","category":"Branch (BM - Bundle 17)","mobile":"01313427026","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":368,"name":"","designation":"Branch Manager","location":"Branch 206","category":"Branch (BM - Bundle 17)","mobile":"01713379376","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":369,"name":"","designation":"Branch Manager","location":"Branch 207","category":"Branch (BM - Bundle 17)","mobile":"01713379305","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":370,"name":"","designation":"Branch Manager","location":"Branch 208","category":"Branch (BM - Bundle 17)","mobile":"01713379369","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":371,"name":"","designation":"Branch Manager","location":"Branch 209","category":"Branch (BM - Bundle 17)","mobile":"01713379306","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":372,"name":"","designation":"Branch Manager","location":"Branch 210","category":"Branch (BM - Bundle 17)","mobile":"01713379308","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":373,"name":"","designation":"Branch Manager","location":"Branch 211","category":"Branch (BM - Bundle 17)","mobile":"01713379310","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":374,"name":"","designation":"Branch Manager","location":"Branch 212","category":"Branch (BM - Bundle 17)","mobile":"01713379304","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":375,"name":"","designation":"Branch Manager","location":"Branch 213","category":"Branch (BM - Bundle 17)","mobile":"01713379370","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":376,"name":"","designation":"Branch Manager","location":"Branch 214","category":"Branch (BM - Bundle 17)","mobile":"01713379372","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":377,"name":"","designation":"Branch Manager","location":"Branch 215","category":"Branch (BM - Bundle 17)","mobile":"01713379307","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":378,"name":"","designation":"Branch Manager","location":"Branch 216","category":"Branch (BM - Bundle 17)","mobile":"01730027076","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":379,"name":"","designation":"Branch Manager","location":"Branch 217","category":"Branch (BM - Bundle 17)","mobile":"01709962317","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":380,"name":"","designation":"Branch Manager","location":"Branch 218","category":"Branch (BM - Bundle 17)","mobile":"01730026298","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":381,"name":"","designation":"Branch Manager","location":"Branch 219","category":"Branch (BM - Bundle 17)","mobile":"01730027163","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":382,"name":"","designation":"Branch Manager","location":"Branch 220","category":"Branch (BM - Bundle 17)","mobile":"01713379371","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":383,"name":"","designation":"Branch Manager","location":"Branch 221","category":"Branch (BM - Bundle 17)","mobile":"01713379379","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":384,"name":"","designation":"Branch Manager","location":"Branch 222","category":"Branch (BM - Bundle 17)","mobile":"01713379373","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":385,"name":"","designation":"Branch Manager","location":"Branch 223","category":"Branch (BM - Bundle 17)","mobile":"01713379367","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":386,"name":"","designation":"Branch Manager","location":"Branch 224","category":"Branch (BM - Bundle 17)","mobile":"01713379378","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":387,"name":"","designation":"Branch Manager","location":"Branch 225","category":"Branch (BM - Bundle 17)","mobile":"01329735001","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":388,"name":"","designation":"Branch Manager","location":"Branch 226","category":"Branch (BM - Bundle 17)","mobile":"01713379366","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":389,"name":"","designation":"Branch Manager","location":"Branch 227","category":"Branch (BM - Bundle 17)","mobile":"01713379338","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":390,"name":"","designation":"Branch Manager","location":"Branch 228","category":"Branch (BM - Bundle 17)","mobile":"01730027094","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":391,"name":"","designation":"Branch Manager","location":"Branch 229","category":"Branch (BM - Bundle 17)","mobile":"01322838699","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":392,"name":"","designation":"Branch Manager","location":"Branch 230","category":"Branch (BM - Bundle 17)","mobile":"01730026868","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":393,"name":"","designation":"Branch Manager","location":"Branch 231","category":"Branch (BM - Bundle 17)","mobile":"01713379406","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":394,"name":"","designation":"Branch Manager","location":"Branch 232","category":"Branch (BM - Bundle 17)","mobile":"01713379266","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":395,"name":"","designation":"Branch Manager","location":"Branch 233","category":"Branch (BM - Bundle 17)","mobile":"01713379410","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":396,"name":"","designation":"Branch Manager","location":"Branch 234","category":"Branch (BM - Bundle 17)","mobile":"01713379408","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":397,"name":"","designation":"Branch Manager","location":"Branch 235","category":"Branch (BM - Bundle 17)","mobile":"01713379262","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":398,"name":"","designation":"Branch Manager","location":"Branch 236","category":"Branch (BM - Bundle 17)","mobile":"01713379407","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":399,"name":"","designation":"Branch Manager","location":"Branch 237","category":"Branch (BM - Bundle 17)","mobile":"01730026930","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":400,"name":"","designation":"Branch Manager","location":"Branch 238","category":"Branch (BM - Bundle 17)","mobile":"01713379264","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":401,"name":"","designation":"Branch Manager","location":"Branch 239","category":"Branch (BM - Bundle 17)","mobile":"01729065342","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":402,"name":"","designation":"Branch Manager","location":"Branch 240","category":"Branch (BM - Bundle 17)","mobile":"01713379267","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":403,"name":"","designation":"Branch Manager","location":"Branch 241","category":"Branch (BM - Bundle 17)","mobile":"01777791367","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":404,"name":"","designation":"Branch Manager","location":"Branch 242","category":"Branch (BM - Bundle 17)","mobile":"01329713435","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":405,"name":"","designation":"Branch Manager","location":"Branch 243","category":"Branch (BM - Bundle 17)","mobile":"01713379409","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":406,"name":"","designation":"Branch Manager","location":"Branch 244","category":"Branch (BM - Bundle 17)","mobile":"01713379265","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":407,"name":"","designation":"Branch Manager","location":"Branch 245","category":"Branch (BM - Bundle 17)","mobile":"01329713434","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":408,"name":"","designation":"Branch Manager","location":"Branch 246","category":"Branch (BM - Bundle 17)","mobile":"01713379336","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":409,"name":"","designation":"Branch Manager","location":"Branch 247","category":"Branch (BM - Bundle 17)","mobile":"01713379337","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":410,"name":"","designation":"Branch Manager","location":"Branch 248","category":"Branch (BM - Bundle 17)","mobile":"01713379268","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":411,"name":"","designation":"Branch Manager","location":"Branch 249","category":"Branch (BM - Bundle 17)","mobile":"01730026931","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":412,"name":"","designation":"Branch Manager","location":"Branch 250","category":"Branch (BM - Bundle 17)","mobile":"01713379263","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":413,"name":"","designation":"Branch Manager","location":"Branch 251","category":"Branch (BM - Bundle 17)","mobile":"01730027096","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":414,"name":"","designation":"Branch Manager","location":"Branch 252","category":"Branch (BM - Bundle 17)","mobile":"01329735269","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":415,"name":"","designation":"Branch Manager","location":"Branch 253","category":"Branch (BM - Bundle 17)","mobile":"01713379273","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":416,"name":"","designation":"Branch Manager","location":"Branch 254","category":"Branch (BM - Bundle 17)","mobile":"01713379272","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":417,"name":"","designation":"Branch Manager","location":"Branch 255","category":"Branch (BM - Bundle 17)","mobile":"01713379271","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":418,"name":"","designation":"Branch Manager","location":"Branch 256","category":"Branch (BM - Bundle 17)","mobile":"01313426842","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":419,"name":"","designation":"Branch Manager","location":"Branch 257","category":"Branch (BM - Bundle 17)","mobile":"01730027175","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":420,"name":"","designation":"Branch Manager","location":"Branch 258","category":"Branch (BM - Bundle 17)","mobile":"01713379257","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":421,"name":"","designation":"Branch Manager","location":"Branch 259","category":"Branch (BM - Bundle 17)","mobile":"01713379259","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":422,"name":"","designation":"Branch Manager","location":"Branch 260","category":"Branch (BM - Bundle 17)","mobile":"01713379258","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":423,"name":"","designation":"Branch Manager","location":"Branch 261","category":"Branch (BM - Bundle 17)","mobile":"01329735249","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":424,"name":"","designation":"Branch Manager","location":"Branch 262","category":"Branch (BM - Bundle 17)","mobile":"01713379260","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":425,"name":"","designation":"Branch Manager","location":"Branch 263","category":"Branch (BM - Bundle 17)","mobile":"01322838652","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":426,"name":"","designation":"Branch Manager","location":"Branch 264","category":"Branch (BM - Bundle 17)","mobile":"01713379261","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":427,"name":"","designation":"Branch Manager","location":"Branch 265","category":"Branch (BM - Bundle 17)","mobile":"01329735007","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":428,"name":"","designation":"Branch Manager","location":"Branch 266","category":"Branch (BM - Bundle 17)","mobile":"01730027106","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":429,"name":"","designation":"Branch Manager","location":"Branch 267","category":"Branch (BM - Bundle 17)","mobile":"01713379270","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":430,"name":"","designation":"Branch Manager","location":"Branch 268","category":"Branch (BM - Bundle 17)","mobile":"01313426781","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":431,"name":"","designation":"Branch Manager","location":"Branch 269","category":"Branch (BM - Bundle 17)","mobile":"01713379269","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":432,"name":"","designation":"Branch Manager","location":"Branch 270","category":"Branch (BM - Bundle 17)","mobile":"01313426759","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":433,"name":"","designation":"Branch Manager","location":"Branch 271","category":"Branch (BM - Bundle 17)","mobile":"01730793185","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":434,"name":"","designation":"Branch Manager","location":"Branch 272","category":"Branch (BM - Bundle 17)","mobile":"01335172528","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":435,"name":"","designation":"Branch Manager","location":"Branch 273","category":"Branch (BM - Bundle 17)","mobile":"01730793194","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":436,"name":"","designation":"Branch Manager","location":"Branch 274","category":"Branch (BM - Bundle 17)","mobile":"01730793190","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":437,"name":"","designation":"Branch Manager","location":"Branch 275","category":"Branch (BM - Bundle 17)","mobile":"01329735190","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":438,"name":"","designation":"Branch Manager","location":"Branch 276","category":"Branch (BM - Bundle 17)","mobile":"01329735048","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":439,"name":"","designation":"Branch Manager","location":"Branch 277","category":"Branch (BM - Bundle 17)","mobile":"01322838640","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":440,"name":"","designation":"Branch Manager","location":"Branch 278","category":"Branch (BM - Bundle 17)","mobile":"01729065215","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":441,"name":"","designation":"Branch Manager","location":"Branch 279","category":"Branch (BM - Bundle 17)","mobile":"01329735200","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":442,"name":"","designation":"Branch Manager","location":"Branch 280","category":"Branch (BM - Bundle 17)","mobile":"01313426865","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":443,"name":"","designation":"Branch Manager","location":"Branch 281","category":"Branch (BM - Bundle 17)","mobile":"01313426856","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":444,"name":"","designation":"Branch Manager","location":"Branch 282","category":"Branch (BM - Bundle 17)","mobile":"01313426923","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":445,"name":"","designation":"Branch Manager","location":"Branch 283","category":"Branch (BM - Bundle 17)","mobile":"01730793171","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":446,"name":"","designation":"Branch Manager","location":"Branch 284","category":"Branch (BM - Bundle 17)","mobile":"01713379251","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":447,"name":"","designation":"Branch Manager","location":"Branch 285","category":"Branch (BM - Bundle 17)","mobile":"01713379252","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":448,"name":"","designation":"Branch Manager","location":"Branch 286","category":"Branch (BM - Bundle 17)","mobile":"01329709722","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":449,"name":"","designation":"Branch Manager","location":"Branch 287","category":"Branch (BM - Bundle 17)","mobile":"01329735035","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":450,"name":"","designation":"Branch Manager","location":"Branch 288","category":"Branch (BM - Bundle 17)","mobile":"01329735174","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":451,"name":"","designation":"Branch Manager","location":"Branch 289","category":"Branch (BM - Bundle 17)","mobile":"01329709649","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":452,"name":"","designation":"Branch Manager","location":"Branch 290","category":"Branch (BM - Bundle 17)","mobile":"01713379255","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":453,"name":"","designation":"Branch Manager","location":"Branch 291","category":"Branch (BM - Bundle 17)","mobile":"01329709652","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":454,"name":"","designation":"Branch Manager","location":"Branch 292","category":"Branch (BM - Bundle 17)","mobile":"01713379254","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":455,"name":"","designation":"Branch Manager","location":"Branch 293","category":"Branch (BM - Bundle 17)","mobile":"01329735140","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":456,"name":"","designation":"Branch Manager","location":"Branch 294","category":"Branch (BM - Bundle 17)","mobile":"01329735184","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":457,"name":"","designation":"Branch Manager","location":"Branch 295","category":"Branch (BM - Bundle 17)","mobile":"01713379253","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":458,"name":"","designation":"Branch Manager","location":"Branch 296","category":"Branch (BM - Bundle 17)","mobile":"01329709658","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":459,"name":"","designation":"Branch Manager","location":"Branch 297","category":"Branch (BM - Bundle 17)","mobile":"01313426761","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":460,"name":"","designation":"Branch Manager","location":"Branch 298","category":"Branch (BM - Bundle 17)","mobile":"01329735031","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":461,"name":"","designation":"Branch Manager","location":"Branch 299","category":"Branch (BM - Bundle 17)","mobile":"01730793154","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":462,"name":"","designation":"Branch Manager","location":"Branch 300","category":"Branch (BM - Bundle 17)","mobile":"01730793165","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":463,"name":"","designation":"Branch Manager","location":"Branch 301","category":"Branch (BM - Bundle 17)","mobile":"01730793181","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":464,"name":"","designation":"Branch Manager","location":"Branch 302","category":"Branch (BM - Bundle 17)","mobile":"01313427009","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":465,"name":"","designation":"Branch Manager","location":"Branch 303","category":"Branch (BM - Bundle 17)","mobile":"01329709325","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":466,"name":"","designation":"Branch Manager","location":"Branch 304","category":"Branch (BM - Bundle 17)","mobile":"01329735247","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":467,"name":"","designation":"Branch Manager","location":"Branch 305","category":"Branch (BM - Bundle 17)","mobile":"01730793102","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":468,"name":"","designation":"Branch Manager","location":"Branch 306","category":"Branch (BM - Bundle 17)","mobile":"01730793113","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":469,"name":"","designation":"Branch Manager","location":"Branch 307","category":"Branch (BM - Bundle 17)","mobile":"01730793118","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":470,"name":"","designation":"Branch Manager","location":"Branch 308","category":"Branch (BM - Bundle 17)","mobile":"01713249711","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":471,"name":"","designation":"Branch Manager","location":"Branch 309","category":"Branch (BM - Bundle 17)","mobile":"01329735246","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":472,"name":"","designation":"Branch Manager","location":"Branch 310","category":"Branch (BM - Bundle 17)","mobile":"01329735248","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":473,"name":"","designation":"Branch Manager","location":"Branch 311","category":"Branch (BM - Bundle 17)","mobile":"01713379226","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":474,"name":"","designation":"Branch Manager","location":"Branch 312","category":"Branch (BM - Bundle 17)","mobile":"01730793108","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":475,"name":"","designation":"Branch Manager","location":"Branch 313","category":"Branch (BM - Bundle 17)","mobile":"01713379214","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":476,"name":"","designation":"Branch Manager","location":"Branch 314","category":"Branch (BM - Bundle 17)","mobile":"01313426778","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":477,"name":"","designation":"Branch Manager","location":"Branch 315","category":"Branch (BM - Bundle 17)","mobile":"01329735122","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":478,"name":"","designation":"Branch Manager","location":"Branch 316","category":"Branch (BM - Bundle 17)","mobile":"01730793160","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":479,"name":"","designation":"Branch Manager","location":"Branch 317","category":"Branch (BM - Bundle 17)","mobile":"01730793176","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":480,"name":"","designation":"Branch Manager","location":"Branch 318","category":"Branch (BM - Bundle 17)","mobile":"01730793142","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":481,"name":"","designation":"Branch Manager","location":"Branch 319","category":"Branch (BM - Bundle 17)","mobile":"01730027281","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":482,"name":"","designation":"Branch Manager","location":"Branch 320","category":"Branch (BM - Bundle 17)","mobile":"01322838686","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":483,"name":"","designation":"Branch Manager","location":"Branch 321","category":"Branch (BM - Bundle 17)","mobile":"01335105617","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":484,"name":"","designation":"Branch Manager","location":"Branch 322","category":"Branch (BM - Bundle 17)","mobile":"01313427010","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":485,"name":"","designation":"Branch Manager","location":"Branch 323","category":"Branch (BM - Bundle 17)","mobile":"01335172470","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":486,"name":"","designation":"Branch Manager","location":"Branch 324","category":"Branch (BM - Bundle 17)","mobile":"01335172472","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":487,"name":"","designation":"Branch Manager","location":"Branch 325","category":"Branch (BM - Bundle 17)","mobile":"01335172474","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":488,"name":"","designation":"Branch Manager","location":"Branch 326","category":"Branch (BM - Bundle 17)","mobile":"01713379331","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":489,"name":"","designation":"Branch Manager","location":"Branch 327","category":"Branch (BM - Bundle 17)","mobile":"01713379342","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":490,"name":"","designation":"Branch Manager","location":"Branch 328","category":"Branch (BM - Bundle 17)","mobile":"01777791478","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":491,"name":"","designation":"Branch Manager","location":"Branch 329","category":"Branch (BM - Bundle 17)","mobile":"01730027297","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":492,"name":"","designation":"Branch Manager","location":"Branch 330","category":"Branch (BM - Bundle 17)","mobile":"01313427014","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":493,"name":"","designation":"Branch Manager","location":"Branch 331","category":"Branch (BM - Bundle 17)","mobile":"01730027060","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":494,"name":"","designation":"Branch Manager","location":"Branch 332","category":"Branch (BM - Bundle 17)","mobile":"01322838694","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":495,"name":"","designation":"Branch Manager","location":"Branch 333","category":"Branch (BM - Bundle 17)","mobile":"01335105724","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":496,"name":"","designation":"Branch Manager","location":"Branch 334","category":"Branch (BM - Bundle 17)","mobile":"01329735058","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":497,"name":"","designation":"Branch Manager","location":"Branch 335","category":"Branch (BM - Bundle 17)","mobile":"01713379334","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":498,"name":"","designation":"Branch Manager","location":"Branch 336","category":"Branch (BM - Bundle 17)","mobile":"01713379341","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":499,"name":"","designation":"Branch Manager","location":"Branch 337","category":"Branch (BM - Bundle 17)","mobile":"01329735054","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":500,"name":"","designation":"Branch Manager","location":"Branch 338","category":"Branch (BM - Bundle 17)","mobile":"01713379311","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":501,"name":"","designation":"Branch Manager","location":"Branch 339","category":"Branch (BM - Bundle 17)","mobile":"01730027007","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":502,"name":"","designation":"Branch Manager","location":"Branch 340","category":"Branch (BM - Bundle 17)","mobile":"01329709623","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":503,"name":"","designation":"Branch Manager","location":"Branch 341","category":"Branch (BM - Bundle 17)","mobile":"01713379333","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":504,"name":"","designation":"Branch Manager","location":"Branch 342","category":"Branch (BM - Bundle 17)","mobile":"01713379332","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":505,"name":"","designation":"Branch Manager","location":"Branch 343","category":"Branch (BM - Bundle 17)","mobile":"01713379335","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":506,"name":"","designation":"Branch Manager","location":"Branch 344","category":"Branch (BM - Bundle 17)","mobile":"01730026250","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":507,"name":"","designation":"Branch Manager","location":"Branch 345","category":"Branch (BM - Bundle 17)","mobile":"01777791567","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":508,"name":"","designation":"Branch Manager","location":"Branch 346","category":"Branch (BM - Bundle 17)","mobile":"01335105725","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":509,"name":"","designation":"Branch Manager","location":"Branch 347","category":"Branch (BM - Bundle 17)","mobile":"01713379385","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":510,"name":"","designation":"Branch Manager","location":"Branch 348","category":"Branch (BM - Bundle 17)","mobile":"01713379390","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":511,"name":"","designation":"Branch Manager","location":"Branch 349","category":"Branch (BM - Bundle 17)","mobile":"01730027230","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":512,"name":"","designation":"Branch Manager","location":"Branch 350","category":"Branch (BM - Bundle 17)","mobile":"01713379391","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":513,"name":"","designation":"Branch Manager","location":"Branch 351","category":"Branch (BM - Bundle 17)","mobile":"01713379393","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":514,"name":"","designation":"Branch Manager","location":"Branch 352","category":"Branch (BM - Bundle 17)","mobile":"01713379392","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":515,"name":"","designation":"Branch Manager","location":"Branch 353","category":"Branch (BM - Bundle 17)","mobile":"01730027232","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":516,"name":"","designation":"Branch Manager","location":"Branch 354","category":"Branch (BM - Bundle 17)","mobile":"01730027017","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":517,"name":"","designation":"Branch Manager","location":"Branch 355","category":"Branch (BM - Bundle 17)","mobile":"01730027043","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":518,"name":"","designation":"Branch Manager","location":"Branch 356","category":"Branch (BM - Bundle 17)","mobile":"01730027082","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":519,"name":"","designation":"Branch Manager","location":"Branch 357","category":"Branch (BM - Bundle 17)","mobile":"01713249652","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":520,"name":"","designation":"Branch Manager","location":"Branch 358","category":"Branch (BM - Bundle 17)","mobile":"01713379394","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":521,"name":"","designation":"Branch Manager","location":"Branch 359","category":"Branch (BM - Bundle 17)","mobile":"01730027236","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":522,"name":"","designation":"Branch Manager","location":"Branch 360","category":"Branch (BM - Bundle 17)","mobile":"01777791687","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":523,"name":"","designation":"Branch Manager","location":"Branch 361","category":"Branch (BM - Bundle 17)","mobile":"01777791682","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":524,"name":"","designation":"Branch Manager","location":"Branch 362","category":"Branch (BM - Bundle 17)","mobile":"01713379388","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":525,"name":"","designation":"Branch Manager","location":"Branch 363","category":"Branch (BM - Bundle 17)","mobile":"01713379386","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":526,"name":"","designation":"Branch Manager","location":"Branch 364","category":"Branch (BM - Bundle 17)","mobile":"01713379387","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":527,"name":"","designation":"Branch Manager","location":"Branch 365","category":"Branch (BM - Bundle 17)","mobile":"01777791699","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":528,"name":"","designation":"Branch Manager","location":"Branch 366","category":"Branch (BM - Bundle 17)","mobile":"01777791693","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":529,"name":"","designation":"Branch Manager","location":"Branch 367","category":"Branch (BM - Bundle 17)","mobile":"01313426855","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":530,"name":"","designation":"Branch Manager","location":"Branch 368","category":"Branch (BM - Bundle 17)","mobile":"01322838654","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":531,"name":"","designation":"Branch Manager","location":"Branch 369","category":"Branch (BM - Bundle 17)","mobile":"01329713579","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":532,"name":"","designation":"Branch Manager","location":"Branch 370","category":"Branch (BM - Bundle 17)","mobile":"01329713577","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":533,"name":"","designation":"Branch Manager","location":"Branch 371","category":"Branch (BM - Bundle 17)","mobile":"01730026290","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":534,"name":"","designation":"Branch Manager","location":"Branch 372","category":"Branch (BM - Bundle 17)","mobile":"01713379380","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":535,"name":"","designation":"Branch Manager","location":"Branch 373","category":"Branch (BM - Bundle 17)","mobile":"01730027265","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":536,"name":"","designation":"Branch Manager","location":"Branch 374","category":"Branch (BM - Bundle 17)","mobile":"01713379375","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":537,"name":"","designation":"Branch Manager","location":"Branch 375","category":"Branch (BM - Bundle 17)","mobile":"01713379374","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":538,"name":"","designation":"Branch Manager","location":"Branch 376","category":"Branch (BM - Bundle 17)","mobile":"01713379381","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":539,"name":"","designation":"Branch Manager","location":"Branch 377","category":"Branch (BM - Bundle 17)","mobile":"01713379382","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":540,"name":"","designation":"Branch Manager","location":"Branch 378","category":"Branch (BM - Bundle 17)","mobile":"01713379384","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":541,"name":"","designation":"Branch Manager","location":"Branch 379","category":"Branch (BM - Bundle 17)","mobile":"01713379383","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":542,"name":"","designation":"Branch Manager","location":"Branch 380","category":"Branch (BM - Bundle 17)","mobile":"01730027258","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":543,"name":"","designation":"Branch Manager","location":"Branch 381","category":"Branch (BM - Bundle 17)","mobile":"01730026270","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":544,"name":"","designation":"Branch Manager","location":"Branch 382","category":"Branch (BM - Bundle 17)","mobile":"01713379377","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":545,"name":"","designation":"Branch Manager","location":"Branch 383","category":"Branch (BM - Bundle 17)","mobile":"01729065160","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":546,"name":"","designation":"Branch Manager","location":"Branch 384","category":"Branch (BM - Bundle 17)","mobile":"01730027201","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":547,"name":"","designation":"Branch Manager","location":"Branch 385","category":"Branch (BM - Bundle 17)","mobile":"01313426868","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":548,"name":"","designation":"Branch Manager","location":"Branch 386","category":"Branch (BM - Bundle 17)","mobile":"01329713495","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":549,"name":"","designation":"Branch Manager","location":"Branch 387","category":"Branch (BM - Bundle 17)","mobile":"01730026330","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":550,"name":"","designation":"Branch Manager","location":"Branch 388","category":"Branch (BM - Bundle 17)","mobile":"01730026911","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":551,"name":"","designation":"Branch Manager","location":"Branch 389","category":"Branch (BM - Bundle 17)","mobile":"01730027180","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":552,"name":"","designation":"Branch Manager","location":"Branch 390","category":"Branch (BM - Bundle 17)","mobile":"01729065174","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":553,"name":"","designation":"Branch Manager","location":"Branch 391","category":"Branch (BM - Bundle 17)","mobile":"01329713502","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":554,"name":"","designation":"Branch Manager","location":"Branch 392","category":"Branch (BM - Bundle 17)","mobile":"01329713493","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":555,"name":"","designation":"Branch Manager","location":"Branch 393","category":"Branch (BM - Bundle 17)","mobile":"01730027182","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":556,"name":"","designation":"Branch Manager","location":"Branch 394","category":"Branch (BM - Bundle 17)","mobile":"01730027193","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":557,"name":"","designation":"Branch Manager","location":"Branch 395","category":"Branch (BM - Bundle 17)","mobile":"01730027195","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":558,"name":"","designation":"Branch Manager","location":"Branch 396","category":"Branch (BM - Bundle 17)","mobile":"01730027197","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"},{"sl":559,"name":"","designation":"Branch Manager","location":"Branch 397","category":"Branch (BM - Bundle 17)","mobile":"01730027260","pin":"","remarks":"Bundle-17 (1000 Min, 150 SMS, 8GB) 750tk/mo"}];
+
+// ---------------- search config ----------------
+const FIELD_WEIGHTS = {
+  name: 6,
+  designation: 4,
+  location: 5,
+  mobile: 6,
+  pin: 5,
+  category: 1,
+  remarks: 1
+};
+
+// light synonym map so everyday phrasing ("zone", "HQ") still finds the right rows
+const SYNONYMS = {
+  zone: ['region'],
+  region: ['zone'],
+  hq: ['head office'],
+  bm: ['branch manager'],
+  rm: ['regional manager'],
+  am: ['area manager'],
+  hr: ['hr & admin', 'hr and admin', 'admin'],
+  admin: ['hr & admin'],
+  fin: ['finance'],
+  acc: ['accounts', 'account', 'acc.'],
+  driver: ['driver'],
+  south: ['(s)'],
+  north: ['(n)'],
+  east: ['(e)'],
+  west: ['(w)'],
+};
+
+function norm(s){
+  return (s || '').toString().toLowerCase();
+}
+function digitsOnly(s){
+  return (s || '').toString().replace(/\D/g, '');
+}
+function wordStarts(val, token){
+  return val.split(/[^a-z0-9]+/).some(w => w.startsWith(token));
+}
+// tiny levenshtein, capped, for short fuzzy typo tolerance
+function lev(a, b){
+  if (Math.abs(a.length - b.length) > 2) return 99;
+  const dp = Array.from({length: a.length+1}, (_, i) => [i, ...Array(b.length).fill(0)]);
+  for (let j=0;j<=b.length;j++) dp[0][j]=j;
+  for (let i=1;i<=a.length;i++){
+    for (let j=1;j<=b.length;j++){
+      dp[i][j] = a[i-1]===b[j-1] ? dp[i-1][j-1] : 1+Math.min(dp[i-1][j-1], dp[i-1][j], dp[i][j-1]);
+    }
+  }
+  return dp[a.length][b.length];
+}
+
+function scoreRow(row, tokens){
+  let total = 0;
+  let matched = 0;
+  for (const token of tokens){
+    let best = 0;
+    const tokenDigits = digitsOnly(token);
+    for (const field in FIELD_WEIGHTS){
+      const weight = FIELD_WEIGHTS[field];
+      const raw = row[field];
+      if (!raw) continue;
+
+      if (field === 'mobile' || field === 'pin'){
+        if (tokenDigits.length >= 3){
+          const fieldDigits = digitsOnly(raw);
+          if (fieldDigits.includes(tokenDigits)){
+            const bonus = fieldDigits.startsWith(tokenDigits) ? 4 : 0;
+            best = Math.max(best, weight + bonus);
+          }
+        }
+        continue;
+      }
+
+      const val = norm(raw);
+      if (!token) continue;
+
+      if (val.includes(token)){
+        best = Math.max(best, weight + (wordStarts(val, token) ? 2 : 0));
+        continue;
+      }
+      const syns = SYNONYMS[token];
+      if (syns){
+        for (const s of syns){
+          if (val.includes(s)){ best = Math.max(best, weight * 0.85); break; }
+        }
+      }
+      if (best === 0 && token.length >= 4){
+        for (const w of val.split(/[^a-z0-9]+/)){
+          if (w.length >= 4 && lev(w, token) <= 1){ best = Math.max(best, weight * 0.6); break; }
+        }
+      }
+    }
+    if (best > 0) matched++;
+    total += best;
+  }
+  if (matched === tokens.length && tokens.length > 1) total *= 1.15;
+  return { score: total, matched };
+}
+
+// Layered AND-first search: require every token to match; if that's too strict,
+// relax by one token at a time until we find something (or give up).
+// This stops a query like "faridpur zone manager" from matching every row that
+// merely contains the word "manager" (i.e. almost the whole directory).
+function searchPool(pool, tokens){
+  let minMatched = tokens.length;
+  let results = [];
+  while (minMatched >= 1){
+    results = [];
+    for (const row of pool){
+      const { score, matched } = scoreRow(row, tokens);
+      if (matched >= minMatched && score > 0) results.push([score, row]);
+    }
+    if (results.length > 0) break;
+    minMatched--;
+  }
+  results.sort((a,b) => b[0]-a[0]);
+  return { results, relaxed: minMatched < tokens.length };
+}
+
+function tokenize(q){
+  return norm(q).split(/\s+/).map(t => t.replace(/[^\w]/g,'')).filter(Boolean);
+}
+
+function highlight(text, tokens){
+  if (!text) return '';
+  let out = text;
+  // highlight longest tokens first so short ones don't split longer matches oddly
+  const sorted = [...tokens].sort((a,b) => b.length - a.length);
+  for (const t of sorted){
+    if (!t || t.length < 2) continue;
+    const re = new RegExp('(' + t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'ig');
+    out = out.replace(re, '<mark>$1</mark>');
+  }
+  return out;
+}
+
+function escapeHtml(s){
+  return (s || '').toString()
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function formatPhone(m){
+  if (!m || m.length !== 11) return m;
+  return m.slice(0,5) + '-' + m.slice(5);
+}
+
+// ---------------- state ----------------
+let activeFilter = 'all';
+const qInput = document.getElementById('q');
+const clearBtn = document.getElementById('clearBtn');
+const resultsEl = document.getElementById('results');
+const statusText = document.getElementById('statusText');
+const statusHint = document.getElementById('statusHint');
+
+document.getElementById('countRegion').textContent =
+  DATA.filter(r => r.category === 'Region & Area Office').length;
+document.getElementById('countBranch').textContent =
+  DATA.filter(r => r.category === 'Branch (BM - Bundle 17)').length;
+
+document.querySelectorAll('.filter-chip').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-chip').forEach(b => b.dataset.active = 'false');
+    btn.dataset.active = 'true';
+    activeFilter = btn.dataset.filter;
+    render();
+  });
+});
+
+document.querySelectorAll('.chip.example').forEach(chip => {
+  chip.addEventListener('click', () => {
+    qInput.value = chip.dataset.fill;
+    qInput.dispatchEvent(new Event('input'));
+    qInput.focus();
+  });
+});
+
+clearBtn.addEventListener('click', () => {
+  qInput.value = '';
+  qInput.dispatchEvent(new Event('input'));
+  qInput.focus();
+});
+
+function makeCardHtml(row, tokens){
+  const isBranch = row.category === 'Branch (BM - Bundle 17)';
+  const nameLabel = row.name
+    ? highlight(escapeHtml(row.name), tokens)
+    : '<span class="name placeholder">' + escapeHtml(row.location) + ' — name not on file</span>';
+  const nameHtml = row.name ? '<div class="name">' + nameLabel + '</div>' : nameLabel;
+
+  const subParts = [];
+  if (row.designation) subParts.push(highlight(escapeHtml(row.designation), tokens));
+  if (row.location) subParts.push(highlight(escapeHtml(row.location), tokens));
+  if (row.pin) subParts.push('PIN ' + highlight(escapeHtml(row.pin), tokens));
+
+  const phoneDisplay = formatPhone(row.mobile);
+  const telHref = 'tel:+880' + row.mobile.replace(/^0/, '');
+
+  return `
+    <div class="card ${isBranch ? 'branch' : ''}">
+      <div class="tab"></div>
+      <div class="card-body">
+        <div class="card-main">
+          ${nameHtml}
+          <div class="sub">${subParts.join('<span class="sep">·</span>')}</div>
+        </div>
+        <div class="card-actions">
+          <span class="phone">${phoneDisplay}</span>
+          <button class="icon-btn" title="Copy number" data-copy="${row.mobile}" aria-label="Copy number">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+          </button>
+          <a class="icon-btn" title="Call" href="${telHref}" aria-label="Call ${row.name || row.location}">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+          </a>
+        </div>
+      </div>
+    </div>`;
+}
+
+function wireCardEvents(container){
+  container.querySelectorAll('[data-copy]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const val = btn.getAttribute('data-copy');
+      navigator.clipboard && navigator.clipboard.writeText(val).then(() => {
+        btn.classList.add('copied');
+        setTimeout(() => btn.classList.remove('copied'), 900);
+      });
+    });
+  });
+}
+
+function emptyState(msg1, msg2){
+  return `<div class="empty-state">
+    <div class="glyph">?</div>
+    <p>${msg1}</p>
+    <p>${msg2 || ''}</p>
+  </div>`;
+}
+
+function render(){
+  const raw = qInput.value;
+  clearBtn.style.display = raw ? 'inline-block' : 'none';
+  const tokens = tokenize(raw);
+
+  let pool = DATA;
+  if (activeFilter !== 'all') pool = pool.filter(r => r.category === activeFilter);
+
+  if (tokens.length === 0){
+    renderBrowse(pool);
+    return;
+  }
+
+  const { results: scored, relaxed } = searchPool(pool, tokens);
+
+  statusText.textContent = scored.length
+    ? `${scored.length} match${scored.length===1?'':'es'} for “${raw.trim()}”`
+    : `No matches for “${raw.trim()}”`;
+  statusHint.textContent = (scored.length && relaxed) ? 'closest matches — not every word matched' : '';
+
+  if (scored.length === 0){
+    resultsEl.innerHTML = emptyState(
+      'No one matched that search.',
+      'Try just a location (e.g. “Faridpur”), a designation (e.g. “driver”), or a phone number fragment.'
+    );
+    return;
+  }
+
+  resultsEl.innerHTML = scored.slice(0, 120).map(([s,row]) => makeCardHtml(row, tokens)).join('');
+  wireCardEvents(resultsEl);
+}
+
+function renderBrowse(pool){
+  if (pool.length === 0){
+    resultsEl.innerHTML = emptyState('Nothing in this category yet.');
+    statusText.textContent = 'Showing 0 contacts';
+    return;
+  }
+
+  statusText.textContent = `Showing ${pool.length} of ${DATA.length} contacts`;
+  statusHint.textContent = 'browsing — type to search';
+
+  const regionRows = pool.filter(r => r.category === 'Region & Area Office');
+  const branchRows = pool.filter(r => r.category === 'Branch (BM - Bundle 17)');
+
+  let html = '';
+
+  if (regionRows.length){
+    // group by location, preserving original source order
+    const groups = [];
+    const seen = new Map();
+    for (const row of regionRows){
+      if (!seen.has(row.location)){
+        seen.set(row.location, groups.length);
+        groups.push({ location: row.location, rows: [] });
+      }
+      groups[seen.get(row.location)].rows.push(row);
+    }
+    for (const g of groups){
+      html += `<div class="group-header"><span>${escapeHtml(g.location)}</span><span class="n">${g.rows.length}</span></div>`;
+      html += g.rows.map(row => makeCardHtml(row, [])).join('');
+    }
+  }
+
+  if (branchRows.length){
+    html += `<details class="branch-block" ${regionRows.length ? '' : 'open'}>
+      <summary><span>Branch Managers — Bundle 17 (${branchRows.length})</span><span class="arrow">▶</span></summary>
+      <div class="branch-grid">`;
+    html += branchRows.map(row => `
+      <div class="bcell">
+        <div class="blabel">${escapeHtml(row.location)}</div>
+        <div class="bphone">
+          <span>${formatPhone(row.mobile)}</span>
+          <a class="icon-btn" title="Call" href="tel:+880${row.mobile.replace(/^0/,'')}" aria-label="Call ${escapeHtml(row.location)}">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+          </a>
+        </div>
+      </div>`).join('');
+    html += `</div></details>`;
+  }
+
+  resultsEl.innerHTML = html;
+  wireCardEvents(resultsEl);
+}
+
+let debounceTimer;
+qInput.addEventListener('input', () => {
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(render, 90);
+});
+
+render();
+</script>
+</body>
+</html>
