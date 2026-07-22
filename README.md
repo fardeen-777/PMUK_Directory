@@ -1,8 +1,9 @@
 # PMUK Staff Phone Directory
 
-A single-page, searchable phone directory for PMUK staff — 559 numbers combined
-from the Region & Area Office mobile bill and the Bundle-17 Branch Manager list.
-No backend, no build step — it's one self-contained `index.html` file.
+A single-page, searchable phone directory for PMUK staff — 3,704 employees
+combined from the Zone & Area Office mobile bill and 19 zone-level branch-staff
+rosters (CM, ABM, Branch Manager, through to Zonal Manager). No backend, no
+build step — it's one self-contained `index.html` file.
 
 ## Put it on GitHub Pages (5 minutes)
 
@@ -40,8 +41,16 @@ from. To refresh it:
 
 ## Notes on the data
 
-- Branch Manager entries (397 of them) have no branch name in the source
-  file, so they're labeled Branch 1–397 in original list order.
-- "Office Code (PIN)" is from the source file and is **not** a unique
-  personal ID — a few codes repeat across two staff at the same office.
+- Branch-level staff (CM, ABM, Branch Manager, Trainee) come from 19 zone
+  mobile-bill files. Designation text was wildly inconsistent at source
+  (140+ spelling variants of the same ~9 roles), so each entry also gets a
+  normalized **Role Group** — the original raw text is kept alongside it,
+  never discarded.
+- A legacy anonymous "Branch Manager" list (397 entries, no names) has been
+  retired in favor of the named zone rosters above, which already covered
+  392 of those same numbers. The 5 that didn't match anything current are
+  kept at the bottom of Branch Staff, flagged as unmatched.
+- "Zone & Area Office" covers Zonal/Regional Managers, Area Managers,
+  HR & Admin, Finance & Accounts, and Drivers.
+- Every entry has a Directory ID (0001–3704) you can search by directly.
 - Numbers are for internal PMUK use.
