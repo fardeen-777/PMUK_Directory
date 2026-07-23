@@ -354,15 +354,15 @@
       <div class="search-row">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
         <input id="q" type="text" autocomplete="off" spellcheck="false"
-          placeholder="Search a name, Directory ID, or try &ldquo;Comilla branch manager&rdquo;">
+          placeholder="Try &ldquo;b-baria zm&rdquo;, &ldquo;ctg south cm&rdquo;, or a name/ID">
         <button id="clearBtn" aria-label="Clear search">Clear</button>
       </div>
       <div class="hint-row">
         <span class="label">Try</span>
-        <span class="chip example" data-fill="Comilla branch manager">Comilla branch manager</span>
-        <span class="chip example" data-fill="Khagrachhari ABM loan">Khagrachhari ABM loan</span>
-        <span class="chip example" data-fill="Faridpur zone admin">Faridpur zone admin</span>
-        <span class="chip example" data-fill="0001">ID 0001</span>
+        <span class="chip example" data-fill="barishal bm">barishal bm</span>
+        <span class="chip example" data-fill="b-baria zm">b-baria zm</span>
+        <span class="chip example" data-fill="ctg south cm">ctg south cm</span>
+        <span class="chip example" data-fill="ctg hill am">ctg hill am</span>
       </div>
       <div class="filters" role="tablist" aria-label="Filter by category">
         <button class="filter-chip" data-active="true" data-filter="all"><span class="dot all"></span>All</button>
@@ -407,6 +407,8 @@
   Every entry has a Directory ID (0001–3704, shown on its card) you can search by directly.
   Designation text varies wildly at source (140+ spelling variants of the same ~9 roles), so branch-level staff also get a normalized <b>Role Group</b> — the original raw text is kept alongside it, never discarded.
   A legacy anonymous "Branch Manager" list (397 entries, no names) has been retired in favor of these named zone rosters, which already covered 392 of those same numbers; the 5 that didn't match anything current are kept at the bottom of Branch Staff, flagged as unmatched.
+  <b>Role tags:</b> type ZM (Zonal/Regional Manager), AM (Area Manager), BM (Branch Manager), CM, or ABM alongside a zone name to filter by role — e.g. "b-baria zm", "ctg south cm".
+  <b>Zone shortcuts:</b> B-Baria (Brahmanbaria), Ctg (Chittagong), Ctg Hill (Chittagong Parbotto/Hill Tracts) — the full names also work.
   Numbers are shown for internal PMUK use.
 </footer>
 
@@ -433,12 +435,26 @@ const SYNONYMS = {
   hr: ['hr &admin', 'hr & admin'],
   finance: ['finance', 'accounts', 'a/c', 'acc'],
   loan: ['loan'],
-  bm: ['branch manager'],
-  abm: ['abm'],
-  cm: ['cm'],
   manager: ['manager', 'manazer'],
   south: ['(s)'],
   north: ['(n)'],
+  // zone shortcuts
+  ctg: ['chittagong'],
+  hill: ['parbotto'],
+  brahmanbaria: ['b-baria'],
+};
+
+// Reserved role-code tokens (bm/am/zm/cm/abm) are matched ONLY against the
+// role fields, never against name/zone/area/branch. Those short 2-3 letter
+// codes are common substrings inside ordinary names (e.g. "Islam", "Kamal"
+// both contain "am"), so letting them match free-text fields would flood
+// results with false positives. This keeps "barishal am" precise.
+const ROLE_TAGS = {
+  zm: v => v.includes('regional manager') || v.includes('zonal manager'),
+  am: v => v.includes('area manager'),
+  bm: v => v.includes('branch manager'),
+  cm: v => v === 'cm' || /\bcm[\s-]?\d*\b/.test(v) || v.includes('community manager'),
+  abm: v => v.startsWith('abm') || v.includes('assistant branch manager') || v.includes('assistans branch manager'),
 };
 
 function norm(s){ return (s || '').toString().toLowerCase(); }
@@ -467,6 +483,17 @@ function scoreRow(row, tokens){
 
     if (token === 'id' && i + 1 < tokens.length && digitsOnly(tokens[i+1]).length >= 1){
       matched++;
+      continue;
+    }
+
+    if (ROLE_TAGS[token]){
+      const rg = norm(row.role_group);
+      const dr = norm(row.designation_raw);
+      if (ROLE_TAGS[token](rg) || ROLE_TAGS[token](dr)){
+        best = Math.max(best, FIELD_WEIGHTS.role_group + 5);
+      }
+      if (best > 0) matched++;
+      total += best;
       continue;
     }
 
@@ -536,7 +563,7 @@ function searchPool(pool, tokens){
 }
 
 function tokenize(q){
-  return norm(q).split(/\s+/).map(t => t.replace(/[^\w]/g,'')).filter(Boolean);
+  return norm(q).split(/\s+/).map(t => t.replace(/[^\w-]/g,'')).filter(Boolean);
 }
 
 function highlight(text, tokens){
@@ -677,7 +704,7 @@ function render(){
     );
     return;
   }
-  resultsEl.innerHTML = scored.slice(0, 150).map(([s,row]) => makeCardHtml(row, tokens)).join('');
+  resultsEl.innerHTML = scored.slice(0, 300).map(([s,row]) => makeCardHtml(row, tokens)).join('');
   wireCardEvents(resultsEl);
 }
 
